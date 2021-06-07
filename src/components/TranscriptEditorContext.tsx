@@ -1,5 +1,5 @@
 import * as R from 'ramda';
-import React, { createContext, PropsWithChildren, RefObject, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { BaseEditor, createEditor, Descendant, Transforms } from 'slate';
 import { HistoryEditor, withHistory } from 'slate-history';
 import { ReactEditor, withReact } from 'slate-react';
@@ -29,6 +29,8 @@ interface TranscriptEditorCtx {
   insertTextInaudible: () => void;
   insertMusicNote: () => void;
   handleAnalyticsEvents: (eventName: string, properties: { fn: string; [key: string]: any }) => void;
+  mediaUrl: string;
+  mediaRef: React.RefObject<HTMLVideoElement>;
 }
 
 const TranscriptEditorContext = createContext<TranscriptEditorCtx | undefined>(undefined);
@@ -43,18 +45,17 @@ export function useTranscriptEditorContext(): TranscriptEditorCtx {
 
 export function TranscriptEditorContextProvider({
   children,
-  defaultShowSpeakers = true,
-  defaultShowTimecodes = true,
   isEditable,
   handleAnalyticsEvents,
-  mediaRef,
+  mediaUrl,
 }: PropsWithChildren<{
   defaultShowSpeakers?: boolean;
   defaultShowTimecodes?: boolean;
   isEditable?: boolean;
   handleAnalyticsEvents?: (eventName: string, properties: { fn: string; [key: string]: any }) => void;
-  mediaRef: RefObject<HTMLVideoElement>;
+  mediaUrl: string;
 }>): JSX.Element {
+  const mediaRef = useRef<HTMLVideoElement>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
@@ -206,6 +207,8 @@ export function TranscriptEditorContextProvider({
       insertTextInaudible,
       insertMusicNote,
       handleAnalyticsEvents,
+      mediaRef,
+      mediaUrl,
     }),
     [
       currentTime,
@@ -224,6 +227,8 @@ export function TranscriptEditorContextProvider({
       speakerOptions,
       value,
       handleAnalyticsEvents,
+      mediaRef,
+      mediaUrl,
     ]
   );
 

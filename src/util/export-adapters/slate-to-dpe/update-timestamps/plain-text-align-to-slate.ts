@@ -59,7 +59,7 @@ const createSlateContentFromSlateJsParagraphs = (currentContent: Descendant[], n
   return updatedBlockArray;
 };
 
-function plainTextalignToSlateJs(words: TranscriptData, text: string, slateJsValue: Descendant[]): Descendant[] {
+function plainTextAlignToSlateJs(words: TranscriptData, text: string, slateJsValue: Descendant[]): Descendant[] {
   // TODO: maybe there's a more performant way to do this?
   // As on larger over 1 hour transcript it might freeze the UI 🤷‍♂️
   const alignedWords = alignSTT(words, text);
@@ -67,4 +67,4 @@ function plainTextalignToSlateJs(words: TranscriptData, text: string, slateJsVal
   return updatedBlockArray;
 }
 
-export default plainTextalignToSlateJs;
+export default plainTextAlignToSlateJs;

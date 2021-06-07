@@ -1,18 +1,4 @@
-import {
-  Button,
-  Container,
-  CssBaseline,
-  FormControl,
-  FormHelperText,
-  Grid,
-  MenuItem,
-  Paper,
-  Select,
-  Switch,
-  Tooltip,
-  Typography,
-} from '@material-ui/core';
-import { Forward10, Replay10 } from '@material-ui/icons';
+import { Container, CssBaseline, Grid, Paper, Tooltip, Typography } from '@material-ui/core';
 import debounce from 'lodash/debounce';
 import path from 'path';
 import React, { PropsWithChildren, useCallback, useEffect } from 'react';
@@ -23,25 +9,19 @@ import download from '../../util/download/index.js';
 import convertDpeToSlate from '../../util/dpe-to-slate';
 import generatePreviousTimingsUpToCurrent from '../../util/dpe-to-slate/generate-previous-timings-up-to-current';
 import exportAdapter, { ExportData, isCaptionType } from '../../util/export-adapters';
-import plainTextalignToSlateJs from '../../util/export-adapters/slate-to-dpe/update-timestamps/plain-text-align-to-slate';
+import plainTextAlignToSlateJs from '../../util/export-adapters/slate-to-dpe/update-timestamps/plain-text-align-to-slate';
 import updateBlocksTimestamps from '../../util/export-adapters/slate-to-dpe/update-timestamps/update-blocks-timestamps';
 import insertTimecodesInLineInSlateJs from '../../util/insert-timecodes-in-line-in-words-list';
-import { shortTimecode } from '../../util/timecode-converter';
-import { Instructions } from '../Instructions';
+import { MediaPlayer } from '../MediaPlayer';
 import SideBtns from '../SideBtns';
 import SlateHelpers from '../slate-helpers';
-import { SpeakersCheatSheet } from '../SpeakersCheatSheet';
 import { TimedTextElement } from '../TimedTextElement';
 import { TranscriptEditorContextProvider, useTranscriptEditorContext } from '../TranscriptEditorContext';
 
-const PLAYBACK_RATE_VALUES = [0.2, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5];
-const SEEK_BACK_SEC = 10;
 const PAUSE_WHILE_TYPING_TIMEOUT_MILLISECONDS = 1500;
 // const MAX_DURATION_FOR_PERFORMANCE_OPTIMIZATION_IN_SECONDS = 3600;
 const REPLACE_WHOLE_TEXT_INSTRUCTION =
   'Replace whole text. \n\nAdvanced feature, if you already have an accurate transcription for the whole text, and you want to restore timecodes for it, you can use this to replace the text in this transcript. \n\nFor now this is an experimental feature. \n\nIt expects plain text, with paragraph breaks as new line breaks but no speakers.';
-
-const mediaRef = React.createRef<HTMLVideoElement>();
 
 const pauseWhileTyping = (current) => {
   current.play();
@@ -81,10 +61,10 @@ export function SlateTranscriptEditor(props: PropsWithChildren<Props>): JSX.Elem
   return (
     <TranscriptEditorContextProvider
       defaultShowSpeakers={props.showSpeakers}
-      mediaRef={mediaRef}
       defaultShowTimecodes={props.showTimecodes}
       handleAnalyticsEvents={props.handleAnalyticsEvents}
       isEditable={props.isEditable}
+      mediaUrl={props.mediaUrl}
     >
       <SlateTranscriptEditorInner {...props} />
     </TranscriptEditorContextProvider>
@@ -107,6 +87,7 @@ function SlateTranscriptEditorInner({ showSpeakers, showTimecodes, ...props }: P
     editor,
     handleTimedTextClick,
     currentTime,
+    mediaRef,
     ...context
   } = useTranscriptEditorContext();
 
@@ -165,51 +146,6 @@ function SlateTranscriptEditorInner({ showSpeakers, showTimecodes, ...props }: P
     return getFileName();
   }, [getFileName, props.title]);
 
-  const handleSetPlaybackRate = useCallback(
-    (e) => {
-      const previousPlaybackRate = playbackRate;
-      const n = e.target.value;
-      const tmpNewPlaybackRateValue = parseFloat(n);
-      if (mediaRef && mediaRef.current) {
-        mediaRef.current.playbackRate = tmpNewPlaybackRateValue;
-        setPlaybackRate(tmpNewPlaybackRateValue);
-
-        props.handleAnalyticsEvents?.('ste_handle_set_playback_rate', {
-          fn: 'handleSetPlaybackRate',
-          previousPlaybackRate,
-          newPlaybackRate: tmpNewPlaybackRateValue,
-        });
-      }
-    },
-    [playbackRate, setPlaybackRate, props]
-  );
-
-  const handleSeekBack = () => {
-    if (mediaRef && mediaRef.current) {
-      const newCurrentTime = mediaRef.current.currentTime - SEEK_BACK_SEC;
-      mediaRef.current.currentTime = newCurrentTime;
-
-      props.handleAnalyticsEvents?.('ste_handle_seek_back', {
-        fn: 'handleSeekBack',
-        newCurrentTimeInSeconds: newCurrentTime,
-        seekBackValue: SEEK_BACK_SEC,
-      });
-    }
-  };
-
-  const handleFastForward = () => {
-    if (mediaRef && mediaRef.current) {
-      const newCurrentTime = mediaRef.current.currentTime + SEEK_BACK_SEC;
-      mediaRef.current.currentTime = newCurrentTime;
-
-      props.handleAnalyticsEvents?.('ste_handle_fast_forward', {
-        fn: 'handleFastForward',
-        newCurrentTimeInSeconds: newCurrentTime,
-        seekBackValue: SEEK_BACK_SEC,
-      });
-    }
-  };
-
   const renderElement = useCallback(
     (elementProps: RenderElementProps) => {
       switch (elementProps.element.type) {
@@ -243,7 +179,7 @@ function SlateTranscriptEditorInner({ showSpeakers, showTimecodes, ...props }: P
   const handleReplaceText = useCallback(() => {
     const newText = prompt(`Paste the text to replace here.\n\n${REPLACE_WHOLE_TEXT_INSTRUCTION}`);
     if (newText) {
-      const newValue = plainTextalignToSlateJs(props.transcriptData, newText, value);
+      const newValue = plainTextAlignToSlateJs(props.transcriptData, newText, value);
       setValue(newValue);
 
       // TODO: consider adding some kind of word count here?
@@ -376,17 +312,6 @@ function SlateTranscriptEditorInner({ showSpeakers, showTimecodes, ...props }: P
    * @param {Number} currentTime - float in seconds
    */
 
-  const handleSetPauseWhileTyping = () => {
-    if (props.handleAnalyticsEvents) {
-      // handles if click cancel and doesn't set speaker name
-      props.handleAnalyticsEvents('ste_handle_set_pause_while_typing', {
-        fn: 'handleSetPauseWhileTyping',
-        isPauseWhileTyping: !isPauseWhileTyping,
-      });
-    }
-    setIsPauseWhileTyping(!isPauseWhileTyping);
-  };
-
   // const debounced_version = throttle(handleRestoreTimecodes, 3000, { leading: false, trailing: true });
   // TODO: revisit logic for
   // - splitting paragraph via enter key
@@ -508,82 +433,7 @@ function SlateTranscriptEditorInner({ showSpeakers, showTimecodes, ...props }: P
 
         <Grid container direction="row" justifyContent="center" alignItems="stretch" spacing={2}>
           <Grid item xs={12} sm={4} md={4} lg={4} xl={4} container direction="column" justifyContent="space-between" alignItems="stretch">
-            <Grid container direction="column" justifyContent="flex-start" alignItems="stretch" spacing={2}>
-              <Grid item container>
-                <video
-                  style={{ backgroundColor: 'black' }}
-                  ref={mediaRef}
-                  src={props.mediaUrl}
-                  width={'100%'}
-                  // height="auto"
-                  controls
-                  playsInline
-                ></video>
-              </Grid>
-              <Grid container direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1} item>
-                <Grid item>
-                  <p>
-                    <code style={{ color: 'grey' }}>{shortTimecode(currentTime)}</code>
-                    <span style={{ color: 'grey' }}> {' | '}</span>
-                    <code style={{ color: 'grey' }}>{context.duration ? `${shortTimecode(context.duration)}` : '00:00:00'}</code>
-                  </p>
-                </Grid>
-                <Grid item>
-                  <FormControl>
-                    <Select labelId="demo-simple-select-label" id="demo-simple-select" value={playbackRate} onChange={handleSetPlaybackRate}>
-                      {PLAYBACK_RATE_VALUES.map((playbackRateValue, index) => {
-                        return (
-                          <MenuItem key={index + playbackRateValue} value={playbackRateValue}>
-                            {' '}
-                            x {playbackRateValue}
-                          </MenuItem>
-                        );
-                      })}
-                    </Select>
-                    <FormHelperText>Speed</FormHelperText>
-                  </FormControl>
-                </Grid>
-                <Grid item>
-                  <Tooltip title={<Typography variant="body1">{` Seek back by ${SEEK_BACK_SEC} seconds`}</Typography>}>
-                    <Button color="primary" onClick={handleSeekBack}>
-                      <Replay10 color="primary" fontSize="large" />
-                    </Button>
-                  </Tooltip>
-                  <Tooltip title={<Typography variant="body1">{` Fast forward by ${SEEK_BACK_SEC} seconds`}</Typography>}>
-                    <Button color="primary" onClick={handleFastForward}>
-                      <Forward10 color="primary" fontSize="large" />
-                    </Button>
-                  </Tooltip>
-                </Grid>
-
-                <Grid item>
-                  {props.isEditable && (
-                    <Tooltip
-                      enterDelay={3000}
-                      title={
-                        <Typography variant="body1">
-                          {`Turn ${isPauseWhileTyping ? 'off' : 'on'} pause while typing functionality. As
-                      you start typing the media while pause playback until you stop. Not
-                      recommended on longer transcript as it might present performance issues.`}
-                        </Typography>
-                      }
-                    >
-                      <Typography variant="subtitle2" gutterBottom>
-                        <Switch color="primary" checked={isPauseWhileTyping} onChange={handleSetPauseWhileTyping} />
-                        Pause media while typing
-                      </Typography>
-                    </Tooltip>
-                  )}
-                </Grid>
-              </Grid>
-
-              <Grid item>
-                <Instructions />
-              </Grid>
-              <Grid item>
-                <SpeakersCheatSheet />
-              </Grid>
-            </Grid>
+            <MediaPlayer />
             <Grid item>{props.children}</Grid>
           </Grid>
 
