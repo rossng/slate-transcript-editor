@@ -2,7 +2,7 @@ import { action } from '@storybook/addon-actions';
 import { Story } from '@storybook/react';
 import 'fontsource-roboto';
 import React, { ComponentProps } from 'react';
-import { DefaultLayout } from '../components/DefaultLayout';
+import { DefaultLayout } from '../components/default-layout';
 import DEMO_SOLEIO from '../sample-data/soleio-dpe.json';
 
 export default {

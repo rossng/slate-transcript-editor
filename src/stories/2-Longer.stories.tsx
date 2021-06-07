@@ -1,6 +1,6 @@
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import { DefaultLayout } from '../components/DefaultLayout';
+import { DefaultLayout } from '../components/default-layout';
 import DEMO_TRANSCRIPT_ZUCK_2HOURS_DPE from '../sample-data/Facebook-CEO-Mark-Zuckerberg-FULL-testimony-before-U.S.senate-pXq-5L2ghhg.mp4.dpe-2hours.json';
 import DEMO_TRANSCRIPT_ZUCK_5HOURS_DPE from '../sample-data/Facebook-CEO-Mark-Zuckerberg-FULL-testimony-before-U.S.senate-pXq-5L2ghhg.mp4.dpe.json';
 

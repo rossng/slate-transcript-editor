@@ -1,7 +1,7 @@
 import { action } from '@storybook/addon-actions';
 import React, { useEffect, useState } from 'react';
-import { DefaultLayout } from '../components/DefaultLayout';
-import { TranscriptData } from '../components/TranscriptEditor';
+import { DefaultLayout } from '../components/default-layout';
+import { TranscriptData } from '../components/editor/transcript-editor';
 import DEMO_SOLEIO_LIVE from '../sample-data/segmented-transcript-soleio-dpe.json';
 
 const DEMO_MEDIA_URL_SOLEIO =

@@ -1,4 +1,4 @@
-import { TranscriptData } from 'components/TranscriptEditor';
+import { TranscriptData } from 'components/editor/transcript-editor';
 import { Descendant } from 'slate';
 /**
  *

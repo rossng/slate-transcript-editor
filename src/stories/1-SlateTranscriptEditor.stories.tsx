@@ -1,9 +1,9 @@
-import Button from '@material-ui/core/Button';
+import { Button } from '@chakra-ui/react';
 import { action } from '@storybook/addon-actions';
 import { Story } from '@storybook/react';
 import 'fontsource-roboto';
 import React, { ComponentProps } from 'react';
-import { DefaultLayout } from '../components/DefaultLayout';
+import { DefaultLayout } from '../components/default-layout';
 import DEMO_SOLEIO from '../sample-data/soleio-dpe.json';
 
 export default {
@@ -152,7 +152,7 @@ OptionalChildComponents.args = {
         title="optional button"
         color="primary"
         onClick={() => {
-          alert('and yes you can add more then one optional componet added from outside STE');
+          alert('and yes you can add more then one optional component added from outside STE');
         }}
       >
         O

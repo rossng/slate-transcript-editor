@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { TranscriptData } from 'components/TranscriptEditor';
+import { TranscriptData } from 'components/editor/transcript-editor';
 import { Descendant, Element } from 'slate';
 import { alignSTT } from 'stt-align-node';
 import { TranscriptWord } from 'types/slate';
