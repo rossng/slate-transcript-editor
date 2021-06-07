@@ -73,11 +73,10 @@ function handleDeleteInParagraph({ editor, event }) {
         mode: 'highest',
       };
       //   const startTimeSecondParagraph = wordsAfter[0].start;
-      const { speaker, start, previousTimings, startTimecode } = currentBlockNode;
+      const { speaker, start, startTimecode } = currentBlockNode;
       const newBlockParagraph = SlateHelpers.createNewParagraphBlock({
         speaker,
         start,
-        previousTimings,
         startTimecode,
         text: newText,
         words: newWords,

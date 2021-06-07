@@ -1,23 +1,20 @@
 import { Button, Divider, Flex, Link, Menu, MenuButton, MenuItem, MenuList, Text, Tooltip } from '@chakra-ui/react';
 import React, { PropsWithChildren } from 'react';
 import { MdImportExport, MdInsertEmoticon, MdKeyboardArrowDown, MdMusicNote, MdRedo, MdSave, MdUndo } from 'react-icons/md';
-import { ExportData } from 'util/export-adapters';
 import subtitlesExportOptionsList from '../../../util/export-adapters/subtitles-generator/list.js';
 import { useTranscriptEditorContext } from '../../misc/transcript-editor-context';
 
-function SideBtns({
-  handleExport,
-  handleReplaceText,
-  handleSave,
-  REPLACE_WHOLE_TEXT_INSTRUCTION,
-  children,
-}: PropsWithChildren<{
-  handleExport: (data: ExportData) => Promise<string>;
-  handleReplaceText: () => void;
-  handleSave: () => void;
-  REPLACE_WHOLE_TEXT_INSTRUCTION: string;
-}>): JSX.Element {
-  const { editor, isProcessing, isContentSaved, isEditable, insertMusicNote, insertTextInaudible } = useTranscriptEditorContext();
+const REPLACE_WHOLE_TEXT_INSTRUCTION = `Replace whole text.
+
+Advanced feature, if you already have an accurate transcription for the whole text, and you want to restore timecodes for it, you can use this to replace the text in this transcript.
+
+For now this is an experimental feature.
+
+It expects plain text, with paragraph breaks as new line breaks but no speakers.`;
+
+function MenuButtons({ children }: PropsWithChildren<Record<never, never>>): JSX.Element {
+  const { editor, isProcessing, isContentSaved, isEditable, insertMusicNote, insertTextInaudible, handleExport, handleSave, handleReplaceText } =
+    useTranscriptEditorContext();
 
   const handleUndo = () => {
     editor.undo();
@@ -239,16 +236,6 @@ function SideBtns({
       )}
       {isEditable && (
         <>
-          {/* TODO: disabling until find a way to handle timecodes and alignment on paragraph break */}
-          {/* <Tooltip
-        title={`To insert a paragraph break, and split a paragraph in two, put the cursor at a point where you'd want to add a paragraph break in the text and either click this button or hit enter key`}
-      >
-        <Button disabled={isProcessing} onClick={handleSplitParagraph} color="primary">
-          <KeyboardReturnOutlinedIcon color="primary" />
-        </Button>
-      </Tooltip> */}
-          {/*  */}
-
           <Tooltip label="Put the cursor at a point where you'd want to add [INAUDIBLE] text, and click this button">
             <Button disabled={isProcessing} onClick={insertTextInaudible} color="primary">
               <MdInsertEmoticon color="primary" />
@@ -285,45 +272,11 @@ function SideBtns({
               <MdRedo color="primary" />
             </Button>
           </Tooltip>
-          {/* <Tooltip
-        title={
-          ' Restore timecodes. At the moment for transcript over 1hour it could temporarily freeze the UI for a few seconds'
-        }
-      >
-        <Button
-          disabled={isProcessing}
-          onClick={async () => {
-            try {
-              setIsProcessing(true);
-              await handleRestoreTimecodes();
-              if (handleAnalyticsEvents) {
-                // handles if click cancel and doesn't set speaker name
-                handleAnalyticsEvents('ste_handle_restore_timecodes_btn', {
-                  fn: 'handleRestoreTimecodes',
-                });
-              }
-            } finally {
-              setIsProcessing(false);
-            }
-          }}
-          color="primary"
-        >
-          <CachedOutlinedIcon
-            color={'primary'}
-            // color={isContentModified ? 'secondary' : 'primary'}
-          />
-        </Button>
-      </Tooltip> */}
           <Tooltip label={REPLACE_WHOLE_TEXT_INSTRUCTION}>
             <Button onClick={handleReplaceText} color="primary">
               <MdImportExport color="primary" />
             </Button>
           </Tooltip>
-          {/* <Tooltip title={' Double click on a word to jump to the corresponding point in the media'}>
-        <Button disabled={isProcessing} color="primary">
-          <InfoOutlined color="primary" />
-        </Button>
-      </Tooltip> */}
         </>
       )}
       {children}
@@ -331,4 +284,4 @@ function SideBtns({
   );
 }
 
-export default SideBtns;
+export default MenuButtons;

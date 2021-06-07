@@ -15,7 +15,7 @@ export interface TimedTextElementProps {
 
 export function TimedTextElement({ showSpeakers, showTimecodes, ...props }: TimedTextElementProps): JSX.Element {
   const { editor, isEditable, handleAnalyticsEvents } = useTranscriptEditorContext();
-  const { handleTimedTextClick } = useMediaPlayerContext();
+  const { handleTimedTextClick, currentTime } = useMediaPlayerContext();
 
   /**
    * `handleSetSpeakerName` is outside of TimedTextElement
@@ -88,8 +88,9 @@ export function TimedTextElement({ showSpeakers, showTimecodes, ...props }: Time
             _hover={{
               textDecoration: 'underline',
             }}
+            color={props.element.start > currentTime ? '#9e9e9e' : 'black'}
             cursor="pointer"
-            className={'text-muted'}
+            className={'timecode'}
             onClick={handleTimedTextClick}
             onDoubleClick={handleTimedTextClick}
             title={props.element.startTimecode}

@@ -18,7 +18,6 @@ declare module 'slate' {
       type: 'timedText';
       speaker: string;
       start: number; // seconds
-      previousTimings: string; // e.g. "1 2 3 4 5"
       startTimecode: string; // e.g. "00:00:25"
       children: CustomText[];
     };

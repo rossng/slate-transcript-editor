@@ -13,7 +13,6 @@ import { Descendant } from 'slate';
  */
 import getWordsForParagraph from '../get-words-for-paragraph';
 import { shortTimecode } from '../timecode-converter';
-import generatePreviousTimingsUpToCurrent from './generate-previous-timings-up-to-current';
 
 /**
  * splices a list of times, int, up to a certain, index current time.
@@ -41,7 +40,6 @@ const convertDpeToSlate = (transcript: TranscriptData): Descendant[] => {
       {
         speaker: 'U_UKN',
         start: 0,
-        previousTimings: '0',
         startTimecode: '00:00:00',
         type: 'timedText',
         children: [
@@ -60,7 +58,6 @@ const convertDpeToSlate = (transcript: TranscriptData): Descendant[] => {
   return paragraphs.map((paragraph) => ({
     speaker: paragraph.speaker,
     start: paragraph.start,
-    previousTimings: generatePreviousTimingsUpToCurrent(paragraph.start),
     // pre-computing the display of the formatting here so that it doesn't need to convert it in leaf render
     startTimecode: shortTimecode(paragraph.start),
     type: 'timedText',

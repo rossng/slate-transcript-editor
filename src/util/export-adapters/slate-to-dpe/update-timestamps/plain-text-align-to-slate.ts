@@ -4,11 +4,10 @@ import { Descendant, Element } from 'slate';
 import { alignSTT } from 'stt-align-node';
 import { TranscriptWord } from 'types/slate';
 import countWords from '../../../count-words';
-import generatePreviousTimingsUpToCurrent from '../../../dpe-to-slate/generate-previous-timings-up-to-current';
 import { shortTimecode } from '../../../timecode-converter';
 
 const createSlateContentFromSlateJsParagraphs = (currentContent: Descendant[], newEntities: TranscriptWord[]): Descendant[] => {
-  // Update entites to block structure.
+  // Update entities to block structure.
   const updatedBlockArray = [];
   let totalWords = 0;
 
@@ -20,19 +19,19 @@ const createSlateContentFromSlateJsParagraphs = (currentContent: Descendant[], n
     // currentContentBlock, would not have speaker and start/end time info
     // so for updatedBlock, getting start time from first word in blockEntities
     const wordsInBlock = countWords(text);
-    const blockEntites = newEntities.slice(totalWords, totalWords + wordsInBlock);
+    const blockEntities = newEntities.slice(totalWords, totalWords + wordsInBlock);
     let speaker = block.speaker;
-    const start = parseFloat(blockEntites[0].start as unknown as string);
-    // const end = parseFloat(blockEntites[blockEntites.length - 1].end);
+    const start = parseFloat(blockEntities[0].start as unknown as string);
+    // const end = parseFloat(blockEntities[blockEntities.length - 1].end);
     // const currentParagraph = { start, end };
-    // The speakers would also not exist. unles in future iteration
-    // ad optin to have a convention for spaker formatting, eg all caps with : at beginning of sentence
-    // or somthing like that but out of scope for now.
+    // The speakers would also not exist. Unless in future iteration
+    // ad option to have a convention for speaker formatting, eg all caps with : at beginning of sentence
+    // or something like that but out of scope for now.
     if (!speaker) {
       speaker = 'U_UKN';
     }
 
-    const newText = blockEntites
+    const newText = blockEntities
       .map((w) => {
         return w.text;
       })
@@ -43,12 +42,11 @@ const createSlateContentFromSlateJsParagraphs = (currentContent: Descendant[], n
       type: 'timedText',
       speaker: speaker,
       start,
-      previousTimings: generatePreviousTimingsUpToCurrent(start),
       startTimecode: shortTimecode(start),
       children: [
         {
           text: newText,
-          words: blockEntites,
+          words: blockEntities,
         },
       ],
     };

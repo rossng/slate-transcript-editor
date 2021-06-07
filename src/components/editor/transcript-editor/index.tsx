@@ -1,4 +1,4 @@
-import { Box } from '@chakra-ui/react';
+import { Box, chakra } from '@chakra-ui/react';
 import debounce from 'lodash/debounce';
 import React, { useCallback } from 'react';
 import { Descendant } from 'slate';
@@ -10,7 +10,6 @@ import { useTranscriptEditorContext } from '../../misc/transcript-editor-context
 import { TimedTextElement } from '../timed-text-element';
 
 const PAUSE_WHILE_TYPING_TIMEOUT_MILLISECONDS = 1500;
-// const MAX_DURATION_FOR_PERFORMANCE_OPTIMIZATION_IN_SECONDS = 3600;
 
 const pauseWhileTyping = (current) => {
   current.play();
@@ -40,7 +39,7 @@ export function TranscriptEditor({
 }): JSX.Element {
   const { setValue, value, setIsContentModified, setIsContentSaved, isPauseWhileTyping, editor, handleAnalyticsEvents, isEditable } =
     useTranscriptEditorContext();
-  const { handleTimedTextClick, mediaRef } = useMediaPlayerContext();
+  const { handleTimedTextClick, mediaRef, currentTime } = useMediaPlayerContext();
 
   const renderElement = useCallback(
     (elementProps: RenderElementProps) => {
@@ -57,19 +56,18 @@ export function TranscriptEditor({
   const renderLeaf = useCallback(
     ({ attributes, children }: RenderLeafProps): JSX.Element => {
       return (
-        <span
+        <chakra.span
           onDoubleClick={handleTimedTextClick}
-          className={'timecode text'}
+          color={children.props.parent.start > currentTime ? '#9e9e9e' : 'black'}
+          className="timecode"
           data-start={children.props.parent.start}
-          data-previous-timings={children.props.parent.previousTimings}
-          // title={'double click on a word to jump to the corresponding point in the media'}
           {...attributes}
         >
           {children}
-        </span>
+        </chakra.span>
       );
     },
-    [handleTimedTextClick]
+    [currentTime, handleTimedTextClick]
   );
 
   /**
@@ -149,7 +147,7 @@ export function TranscriptEditor({
     <Box>
       {value.length !== 0 ? (
         <>
-          <section className="editor-wrapper-container">
+          <chakra.section fontFamily="Roboto, sans-serif" padding="8px 16px" h="85vh" overflow="auto">
             <Slate
               editor={editor}
               value={value}
@@ -168,7 +166,7 @@ export function TranscriptEditor({
                 onKeyDown={handleOnKeyDown}
               />
             </Slate>
-          </section>
+          </chakra.section>
         </>
       ) : (
         <section className="text-center">
