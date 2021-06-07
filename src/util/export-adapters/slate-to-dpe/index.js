@@ -45,7 +45,7 @@ const slateParagraphsToDpeWords = (slateParagraphs) => {
  * @param {*} currentContent - slate js value
  * @return dpe transcript with paragraphs and words
  */
-const converSlateToDpe = (currentContent) => {
+const convertSlateToDpe = (currentContent) => {
   // using updateBloocksTimestamps instead of previous way to align
   // this should be more computationally efficient for now as it only adjust paragraphs that have changed
   // keeps source of truth in the blocks as opposed to compare to the dpe transcript
@@ -58,4 +58,4 @@ const converSlateToDpe = (currentContent) => {
   return { words: alignedWords, paragraphs: updatedContent };
 };
 
-export default converSlateToDpe;
+export default convertSlateToDpe;

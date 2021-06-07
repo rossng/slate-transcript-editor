@@ -5,12 +5,12 @@ import 'fontsource-roboto';
 import React from 'react';
 import { version } from '../../package.json';
 // import purple from '@material-ui/core/colors/purple';
-import { SlateTranscriptEditor } from '../components/TranscriptEditor';
+import { DefaultLayout } from '../components/DefaultLayout';
 import DEMO_SOLEIO from '../sample-data/soleio-dpe.json';
 
 export default {
   title: 'Custom Theme',
-  component: SlateTranscriptEditor,
+  component: DefaultLayout,
 };
 
 const DEMO_MEDIA_URL_SOLEIO =
@@ -38,7 +38,7 @@ export const CustomTheme = () => {
         Slate Transcript Editor version: <code>{version}</code>
       </p>
       <ThemeProvider theme={theme}>
-        <SlateTranscriptEditor
+        <DefaultLayout
           title={DEMO_TITLE_SOLEIO}
           mediaUrl={DEMO_MEDIA_URL_SOLEIO}
           handleSaveEditor={action('handleSaveEditor')}
@@ -74,7 +74,7 @@ export const CustomThemeExampleTwo = () => {
         Slate Transcript Editor version: <code>{version}</code>
       </p>
       <ThemeProvider theme={theme}>
-        <SlateTranscriptEditor
+        <DefaultLayout
           title={DEMO_TITLE_SOLEIO}
           mediaUrl={DEMO_MEDIA_URL_SOLEIO}
           handleSaveEditor={action('handleSaveEditor')}

@@ -2,12 +2,12 @@ import { action } from '@storybook/addon-actions';
 import { Story } from '@storybook/react';
 import 'fontsource-roboto';
 import React, { ComponentProps } from 'react';
-import { SlateTranscriptEditor } from '../components/TranscriptEditor';
+import { DefaultLayout } from '../components/DefaultLayout';
 import DEMO_SOLEIO from '../sample-data/soleio-dpe.json';
 
 export default {
   title: 'Saving indicator',
-  component: SlateTranscriptEditor,
+  component: DefaultLayout,
   argTypes: {
     autoSaveContentType: {
       options: ['digitalpaperedit', 'slate'],
@@ -20,7 +20,7 @@ export default {
   },
 };
 
-const Template: Story<ComponentProps<typeof SlateTranscriptEditor>> = (args) => <SlateTranscriptEditor {...args} />;
+const Template: Story<ComponentProps<typeof DefaultLayout>> = (args) => <DefaultLayout {...args} />;
 
 const DEMO_MEDIA_URL_SOLEIO =
   'https://digital-paper-edit-demo.s3.eu-west-2.amazonaws.com/PBS-Frontline/The+Facebook+Dilemma+-+interviews/The+Facebook+Dilemma+-+Soleio+Cuervo-OIAUfZBd_7w.mp4';

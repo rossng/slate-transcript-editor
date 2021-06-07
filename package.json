@@ -1,6 +1,6 @@
 {
-  "name": "slate-transcript-editor",
-  "version": "0.1.6-alpha.14",
+  "name": "@clowdr-app/slate-transcript-editor",
+  "version": "0.2.0-alpha.1",
   "description": "A React component to make correcting automated transcriptions of audio and video easier and faster. Using the Slate Editor",
   "main": "src/index.js",
   "scripts": {
@@ -24,6 +24,10 @@
     {
       "name": "Pietro Passarelli",
       "url": "https://github.com/pietrop"
+    },
+    {
+      "name": "Ross Gardiner",
+      "url": "https://github.com/rossng"
     }
   ],
   "bugs": {

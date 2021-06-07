@@ -3,12 +3,12 @@ import { action } from '@storybook/addon-actions';
 import { Story } from '@storybook/react';
 import 'fontsource-roboto';
 import React, { ComponentProps } from 'react';
-import { SlateTranscriptEditor } from '../components/TranscriptEditor';
+import { DefaultLayout } from '../components/DefaultLayout';
 import DEMO_SOLEIO from '../sample-data/soleio-dpe.json';
 
 export default {
-  title: 'SlateTranscriptEditor',
-  component: SlateTranscriptEditor,
+  title: 'DefaultLayout',
+  component: DefaultLayout,
   argTypes: {
     autoSaveContentType: {
       options: ['digitalpaperedit', 'slate'],
@@ -21,7 +21,7 @@ export default {
   },
 };
 
-const Template: Story<ComponentProps<typeof SlateTranscriptEditor>> = (args) => <SlateTranscriptEditor {...args} />;
+const Template: Story<ComponentProps<typeof DefaultLayout>> = (args) => <DefaultLayout {...args} />;
 
 const AUDIO_URL = 'https://www.w3schools.com/tags/horse.ogg';
 
