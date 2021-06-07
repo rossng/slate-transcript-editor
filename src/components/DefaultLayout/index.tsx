@@ -34,23 +34,24 @@ export interface Props {
   mediaType?: string;
 }
 
-export function DefaultLayout({
-  showTitle = false,
-  showTimecodes = true,
-  showSpeakers = true,
-  autoSaveContentType = 'digitalpaperedit',
-  isEditable = true,
-  ...props
-}: PropsWithChildren<Props>): JSX.Element {
+DefaultLayout.defaultProps = {
+  showTitle: false,
+  showTimecodes: true,
+  showSpeakers: true,
+  autoSaveContentType: 'digitalpaperedit',
+  isEditable: true,
+};
+
+export function DefaultLayout(props: PropsWithChildren<Props>): JSX.Element {
   return (
     <TranscriptEditorContextProvider
-      defaultShowSpeakers={showSpeakers}
-      defaultShowTimecodes={showTimecodes}
+      defaultShowSpeakers={props.showSpeakers}
+      defaultShowTimecodes={props.showTimecodes}
       handleAnalyticsEvents={props.handleAnalyticsEvents}
-      isEditable={isEditable}
+      isEditable={props.isEditable}
       mediaUrl={props.mediaUrl}
     >
-      <DefaultLayoutInner showTitle={showTitle} autoSaveContentType={autoSaveContentType} {...props} />
+      <DefaultLayoutInner showTitle={props.showTitle} autoSaveContentType={props.autoSaveContentType} {...props} />
     </TranscriptEditorContextProvider>
   );
 }
