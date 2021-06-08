@@ -4,7 +4,7 @@
   "description": "A React component to make correcting automated transcriptions of audio and video easier and faster. Using the Slate Editor",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"No test specified\"",
+    "test": "jest",
     "start": "npm run storybook",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook -o .out",
@@ -45,6 +45,7 @@
     "@emotion/styled": "^11.3.0",
     "@types/ramda": "^0.27.40",
     "@types/react": "^17.0.9",
+    "@types/sbd": "^1.0.1",
     "docx": "^6.0.3",
     "fontsource-roboto": "^4.0.0",
     "framer-motion": "^4.1.17",
@@ -79,9 +80,11 @@
     "eslint-plugin-react-hooks": "^4.2.0",
     "gh-pages": "^2.2.0",
     "husky": "^6.0.0",
+    "jest": "^27.0.4",
     "prettier": "^2.3.1",
     "pretty-quick": "^3.1.0",
     "rimraf": "^3.0.2",
+    "ts-jest": "^27.0.3",
     "typescript": "^4.3.2"
   }
 }

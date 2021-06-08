@@ -14,38 +14,33 @@
  * @param {*} seconds
  * @param {*} fps
  */
-const normalisePlayerTime = function (seconds, fps) {
+const normalisePlayerTime = function (seconds: number, fps: number): number {
   return Number(((1.0 / fps) * Math.floor(Number((fps * seconds).toPrecision(12)))).toFixed(2));
 };
 
-/*
- * @param {*} seconds
- * @param {*} fps
+/**
+ * Convert a time in seconds to a timestamp in the `hh:mm:ss:ff` format.
+ * @param seconds
+ * @param fps Frames per second
  */
-const secondsToTimecode = function (seconds, framePerSeconds) {
+export function secondsToTimecode(seconds: number, fps = 25): string {
   // handle edge case, trying to convert zero seconds
   if (seconds === 0) {
     return '00:00:00:00';
   }
-  // written for PAL non-drop timecode
-  let fps = 25;
-  if (framePerSeconds !== undefined) {
-    fps = framePerSeconds;
-  }
 
   const normalisedSeconds = normalisePlayerTime(seconds, fps);
-
   const wholeSeconds = Math.floor(normalisedSeconds);
-  const frames = ((normalisedSeconds - wholeSeconds) * fps).toFixed(2);
+  const frames = Math.round((normalisedSeconds - wholeSeconds) * fps);
 
   // prepends zero - example pads 3 to 03
-  function _padZero(n) {
-    if (n < 10) return `0${parseInt(n)}`;
+  function padZero(n: number) {
+    if (n < 10) return `0${Math.floor(n)}`;
 
-    return parseInt(n);
+    return Math.floor(n);
   }
 
-  return `${_padZero((wholeSeconds / 60 / 60) % 60)}:${_padZero((wholeSeconds / 60) % 60)}:${_padZero(wholeSeconds % 60)}:${_padZero(frames)}`;
-};
+  return `${padZero((wholeSeconds / 60 / 60) % 60)}:${padZero((wholeSeconds / 60) % 60)}:${padZero(wholeSeconds % 60)}:${padZero(frames)}`;
+}
 
 export default secondsToTimecode;

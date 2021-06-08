@@ -1,10 +1,10 @@
-import fs from 'fs';
 import subtitlesGenerator from './index.js';
+import { Word } from './presegment-text/index.js';
 // import transcript from './sample/words-list.sample.json';
 import transcript from './sample/words-list-2.sample.json';
 const sampleWords = transcript.words;
 
-function getTextFromWordsList(words) {
+function getTextFromWordsList(words: Word[]): string {
   return words
     .map((word) => {
       return word.text;
@@ -13,6 +13,7 @@ function getTextFromWordsList(words) {
 }
 
 const plainText = getTextFromWordsList(sampleWords);
+console.log(plainText);
 
 const subtitlesJson = subtitlesGenerator({ words: sampleWords, type: 'json' });
 // const ttmlPremiere = subtitlesGenerator({ words: sampleWords, type: 'premiere' });

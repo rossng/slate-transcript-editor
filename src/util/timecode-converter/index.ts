@@ -2,12 +2,12 @@
  * Wrapping around "time stamps" and timecode conversion modules
  * To provide more support for variety of formats.
  */
-import secondsToTimecode from './src/secondsToTimecode';
-import timecodeToSecondsHelper from './src/timecodeToSeconds';
-import padTimeToTimecode from './src/padTimeToTimecode';
+import { padTimeToTimecode } from './src/padTimeToTimecode';
+import { secondsToTimecode } from './src/secondsToTimecode';
+import { timecodeToSecondsHelper } from './src/timecodeToSeconds';
 
 /**
- * @param {*} time
+ * @param time
  * Can take as input timecodes in the following formats
  * - hh:mm:ss:ff
  * - mm:ss
@@ -16,19 +16,19 @@ import padTimeToTimecode from './src/padTimeToTimecode';
  * - hh:mm:ff
  * @todo could be refactored with some helper functions for clarity
  */
-const timecodeToSeconds = (time) => {
+function timecodeToSeconds(time: string): number {
   if (typeof time === 'string') {
     const resultPadded = padTimeToTimecode(time);
-    const resultConverted = timecodeToSecondsHelper(resultPadded);
+    const resultConverted = timecodeToSecondsHelper(resultPadded.toString());
 
     return resultConverted;
   }
 
   // assuming it receive timecode as seconds as string '600'
   return parseFloat(time);
-};
+}
 
-const shortTimecode = (time) => {
+function shortTimecode(time: number): string {
   // handle edge case if it's zero, then just return shorter timecode
   if (time === 0) {
     return '00:00:00';
@@ -36,6 +36,6 @@ const shortTimecode = (time) => {
     const timecode = secondsToTimecode(time);
     return timecode.slice(0, -3);
   }
-};
+}
 
 export { secondsToTimecode, timecodeToSeconds, shortTimecode };

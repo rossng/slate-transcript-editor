@@ -1,14 +1,21 @@
-import textSegmentation from './text-segmentation/index.js';
-import addLineBreakBetweenSentences from './line-break-between-sentences/index.js';
-import foldWords from './fold/index.js';
-import divideIntoTwoLines from './divide-into-two-lines/index.js';
+import { divideIntoTwoLines } from './divide-into-two-lines';
+import { foldWords } from './fold';
+import { addLineBreakBetweenSentences } from './line-break-between-sentences';
+import { textSegmentation } from './text-segmentation';
+
+export interface Word {
+  id: number;
+  start: number;
+  end: number;
+  text: string;
+}
 
 /**
  * Takes in array of word object,
  *  and returns string containing all the text
  * @param {array} words - Words
  */
-function getTextFromWordsList(words) {
+function getTextFromWordsList(words: Word[]): string {
   return words
     .map((word) => {
       return word.text;
@@ -20,13 +27,10 @@ function getTextFromWordsList(words) {
  *
  * @param {*} textInput - can be either plain text string or an array of word objects
  */
-function preSegmentText(textInput, tmpNumberOfCharPerLine = 35) {
-  let text = textInput;
-  if (typeof textInput === 'object') {
-    text = getTextFromWordsList(textInput);
-  }
+function preSegmentText(textInput: string | Word[], tmpNumberOfCharPerLine = 35): string {
+  const text: string = typeof textInput === 'string' ? textInput : getTextFromWordsList(textInput);
   const segmentedText = textSegmentation(text);
-  // - 2.Line brek between stentences
+  // - 2.Line break between sentences
   const textWithLineBreakBetweenSentences = addLineBreakBetweenSentences(segmentedText);
   // - 3.Fold char limit per line
   const foldedText = foldWords(textWithLineBreakBetweenSentences, tmpNumberOfCharPerLine);
@@ -37,5 +41,3 @@ function preSegmentText(textInput, tmpNumberOfCharPerLine = 35) {
 }
 
 export { preSegmentText, getTextFromWordsList };
-
-export default preSegmentText;

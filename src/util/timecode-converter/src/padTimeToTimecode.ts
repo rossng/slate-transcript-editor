@@ -1,10 +1,16 @@
-const countColon = (timecode) => timecode.split(':').length;
+function countColon(timecode: string): number {
+  return timecode.split(':').length;
+}
 
-const includesFullStop = (timecode) => timecode.includes('.');
+function includesFullStop(timecode: string): boolean {
+  return timecode.includes('.');
+}
 
-const isOneDigit = (str) => str.length === 1;
+function isOneDigit(str: string): boolean {
+  return str.length === 1;
+}
 
-const padTimeToTimecode = (time) => {
+export function padTimeToTimecode(time: string | number): string | number {
   if (typeof time === 'string') {
     switch (countColon(time)) {
       case 4:
@@ -45,6 +51,4 @@ const padTimeToTimecode = (time) => {
   } else {
     return time;
   }
-};
-
-export default padTimeToTimecode;
+}

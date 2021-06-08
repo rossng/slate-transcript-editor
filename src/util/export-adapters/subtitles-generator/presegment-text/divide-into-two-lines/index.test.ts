@@ -1,7 +1,6 @@
-'use strict';
-import divideIntoTwoLines from './index.js';
+import { divideIntoTwoLines } from './';
 
-var sampleText = `Hi there, my name is Ian police -
+const sampleText = `Hi there, my name is Ian police -
 are recording this video to talk
 about mercury for the folks at a
 tech daily conference in New York.
@@ -20,7 +19,7 @@ synthetic voices at time codes that
 line up with the original original
 audio.`;
 
-var expectedOutput = `Hi there, my name is Ian police -
+const expectedOutput = `Hi there, my name is Ian police -
 are recording this video to talk
 
 about mercury for the folks at a
@@ -45,6 +44,6 @@ line up with the original original
 audio.`;
 
 test('divide into two lines', () => {
-  var result = divideIntoTwoLines(sampleText);
+  const result = divideIntoTwoLines(sampleText);
   expect(result).toBe(expectedOutput);
 });

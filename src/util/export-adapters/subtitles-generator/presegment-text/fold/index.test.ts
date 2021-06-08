@@ -1,5 +1,4 @@
-'use strict';
-import foldWords from './index.js';
+import { foldWords } from './';
 
 const sampleText = `Hi there, my name is Ian police - are recording this video to talk about mercury for the folks at a tech daily conference in New York.
 

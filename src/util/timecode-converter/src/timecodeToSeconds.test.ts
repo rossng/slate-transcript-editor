@@ -1,4 +1,4 @@
-import timecodeToSecondsHelper from './timecodeToSeconds';
+import { timecodeToSecondsHelper } from './timecodeToSeconds';
 
 describe('Timecode conversion TC- convertToSeconds', () => {
   it('Should be defined', () => {

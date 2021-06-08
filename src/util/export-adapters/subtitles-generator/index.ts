@@ -1,18 +1,16 @@
-import formatSeconds from './compose-subtitles/util/format-seconds.js';
-import textSegmentation from './presegment-text/text-segmentation/index.js';
-import addLineBreakBetweenSentences from './presegment-text/line-break-between-sentences/index.js';
-import foldWords from './presegment-text/fold/index.js';
-import divideIntoTwoLines from './presegment-text/divide-into-two-lines/index.js';
-import preSegmentText from './presegment-text/index.js';
-import { getTextFromWordsList } from './presegment-text/index.js';
-
-import ttmlGeneratorPremiere from './compose-subtitles/premiere.js';
-import ittGenerator from './compose-subtitles/itt.js';
-import ttmlGenerator from './compose-subtitles/ttml.js';
-import srtGenerator from './compose-subtitles/srt.js';
-import vttGenerator from './compose-subtitles/vtt.js';
-import csvGenerator from './compose-subtitles/csv.js';
 import countWords from '../../count-words';
+import csvGenerator from './compose-subtitles/csv.js';
+import ittGenerator from './compose-subtitles/itt.js';
+import ttmlGeneratorPremiere from './compose-subtitles/premiere.js';
+import srtGenerator from './compose-subtitles/srt.js';
+import ttmlGenerator from './compose-subtitles/ttml.js';
+import formatSeconds from './compose-subtitles/util/format-seconds.js';
+import vttGenerator from './compose-subtitles/vtt.js';
+import { divideIntoTwoLines } from './presegment-text/divide-into-two-lines';
+import { foldWords } from './presegment-text/fold';
+import { getTextFromWordsList, preSegmentText } from './presegment-text/index.js';
+import { addLineBreakBetweenSentences } from './presegment-text/line-break-between-sentences';
+import { textSegmentation } from './presegment-text/text-segmentation';
 
 function segmentedTextToList(text) {
   let result = text.split('\n\n');

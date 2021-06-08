@@ -1,4 +1,4 @@
-import padTimeToTimecode from './padTimeToTimecode';
+import { padTimeToTimecode } from './padTimeToTimecode';
 
 describe('Timecode conversion TC- convertToSeconds', () => {
   it('Should be defined', () => {
