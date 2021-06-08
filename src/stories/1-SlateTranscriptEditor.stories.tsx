@@ -1,4 +1,3 @@
-import { Button } from '@chakra-ui/react';
 import { action } from '@storybook/addon-actions';
 import { Story } from '@storybook/react';
 import 'fontsource-roboto';
@@ -137,27 +136,5 @@ OptionalChildComponents.args = {
   autoSaveContentType: 'digitalpaperedit',
   transcriptData: DEMO_SOLEIO,
   handleAnalyticsEvents: action('handleAnalyticsEvents'),
-  optionalBtns: (
-    <>
-      <Button
-        title="optional button"
-        color="primary"
-        onClick={() => {
-          alert('optional componet added from outside STE');
-        }}
-      >
-        B
-      </Button>
-      <Button
-        title="optional button"
-        color="primary"
-        onClick={() => {
-          alert('and yes you can add more then one optional component added from outside STE');
-        }}
-      >
-        O
-      </Button>
-    </>
-  ),
   children: <h1>Optional child component</h1>,
 };

@@ -6,7 +6,7 @@ export function SpeakersCheatSheet(): JSX.Element {
   const context = useTranscriptEditorContext();
 
   return (
-    <Accordion>
+    <Accordion allowToggle>
       <AccordionItem>
         <AccordionButton>
           <Box flex="1" textAlign="left">

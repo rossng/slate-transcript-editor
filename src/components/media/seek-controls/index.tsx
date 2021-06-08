@@ -1,4 +1,4 @@
-import { Button, Flex, Text, Tooltip } from '@chakra-ui/react';
+import { Button, Flex, Tooltip } from '@chakra-ui/react';
 import React from 'react';
 import { MdForward10, MdReplay10 } from 'react-icons/md';
 import { useMediaPlayerContext } from '../../misc/media-player-context';
@@ -36,14 +36,14 @@ export function SeekControls(): JSX.Element {
   };
   return (
     <Flex flexDir="row">
-      <Tooltip label={<Text>{` Seek back by ${SEEK_BACK_SEC} seconds`}</Text>}>
+      <Tooltip label={`Seek back by ${SEEK_BACK_SEC} seconds`}>
         <Button color="primary" onClick={handleSeekBack}>
-          <MdReplay10 color="primary" fontSize="large" />
+          <MdReplay10 color="primary" fontSize="large" size={32} />
         </Button>
       </Tooltip>
-      <Tooltip label={<Text>{` Fast forward by ${SEEK_BACK_SEC} seconds`}</Text>}>
-        <Button color="primary" onClick={handleFastForward}>
-          <MdForward10 color="primary" fontSize="large" />
+      <Tooltip label={`Fast forward by ${SEEK_BACK_SEC} seconds`}>
+        <Button color="primary" onClick={handleFastForward} ml={2}>
+          <MdForward10 color="primary" fontSize="large" size={32} />
         </Button>
       </Tooltip>
     </Flex>

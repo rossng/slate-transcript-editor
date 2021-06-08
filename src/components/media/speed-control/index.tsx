@@ -1,5 +1,5 @@
-import { FormControl, FormHelperText } from '@chakra-ui/form-control';
-import { Select } from '@chakra-ui/react';
+import { FormControl } from '@chakra-ui/form-control';
+import { Flex, FormLabel, Select } from '@chakra-ui/react';
 import React, { useCallback } from 'react';
 import { useMediaPlayerContext } from '../../misc/media-player-context';
 import { useTranscriptEditorContext } from '../../misc/transcript-editor-context';
@@ -31,17 +31,18 @@ export function SpeedControl(): JSX.Element {
 
   return (
     <FormControl>
-      <Select labelId="demo-simple-select-label" id="demo-simple-select" value={playbackRate} onChange={handleSetPlaybackRate}>
-        {PLAYBACK_RATE_VALUES.map((playbackRateValue, index) => {
-          return (
-            <option key={index + playbackRateValue} value={playbackRateValue}>
-              {' '}
-              x {playbackRateValue}
-            </option>
-          );
-        })}
-      </Select>
-      <FormHelperText>Speed</FormHelperText>
+      <Flex alignItems="center">
+        <FormLabel>Speed</FormLabel>
+        <Select value={playbackRate} onChange={handleSetPlaybackRate} w="max-content">
+          {PLAYBACK_RATE_VALUES.map((playbackRateValue, index) => {
+            return (
+              <option key={index + playbackRateValue} value={playbackRateValue}>
+                {playbackRateValue}x
+              </option>
+            );
+          })}
+        </Select>
+      </Flex>
     </FormControl>
   );
 }

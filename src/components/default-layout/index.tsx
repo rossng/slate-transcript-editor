@@ -7,7 +7,7 @@ import { MediaPlayer } from '../media/media-player';
 import { SeekControls } from '../media/seek-controls';
 import { SpeedControl } from '../media/speed-control';
 import { TimecodeDisplay } from '../media/timecode-display';
-import MenuButtons from '../menus/menu-buttons';
+import { MenuButtons } from '../menus/menu-buttons';
 import { Instructions } from '../misc/instructions';
 import { MediaPlayerContextProvider } from '../misc/media-player-context';
 import { SpeakersCheatSheet } from '../misc/speakers-cheat-sheet';
@@ -26,7 +26,6 @@ export interface Props {
   title?: string;
   transcriptDataLive?: TranscriptData;
   handleAnalyticsEvents?: (eventName: string, properties: { fn: string; [key: string]: any }) => void;
-  optionalBtns?: React.ReactNode | React.ReactNodeArray;
   mediaType?: string;
 }
 
@@ -76,12 +75,6 @@ function DefaultLayoutInner({
     }
   }, [isProcessing]);
 
-  /**
-   * See explanation in `src/utils/dpe-to-slate/index.js` for how this function works with css injection
-   * to provide current paragraph's highlight.
-   * @param {Number} currentTime - float in seconds
-   */
-
   return (
     <ChakraProvider theme={theme}>
       <Box>
@@ -92,14 +85,22 @@ function DefaultLayoutInner({
             <Flex flexDir="column">
               <MediaPlayer />
               <Flex flexDir="row" justifyContent="space-between" mt={4}>
-                <TimecodeDisplay />
-                <SpeedControl />
+                <Box flex="1">
+                  <TimecodeDisplay />
+                </Box>
+                <Box>
+                  <SpeedControl />
+                </Box>
               </Flex>
-              <SeekControls />
+              <Flex justifyContent="center" my={4}>
+                <SeekControls />
+              </Flex>
               <AutoPauseControl />
-              <Box>{children}</Box>
               <Instructions />
-              <SpeakersCheatSheet />
+              <Box my={4}>
+                <SpeakersCheatSheet />
+              </Box>
+              <Box>{children}</Box>
             </Flex>
           </Box>
 

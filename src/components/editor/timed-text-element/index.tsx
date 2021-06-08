@@ -67,21 +67,21 @@ export function TimedTextElement({ showSpeakers, showTimecodes, ...props }: Time
     [editor, handleAnalyticsEvents, isEditable]
   );
 
-  let textXl = 12;
+  let textColspan = 12;
   if (!showSpeakers && !showTimecodes) {
-    textXl = 12;
+    textColspan = 12;
   } else if (showSpeakers && !showTimecodes) {
-    textXl = 11;
+    textColspan = 11;
   } else if (!showSpeakers && showTimecodes) {
-    textXl = 10;
+    textColspan = 10;
   } else if (showSpeakers && showTimecodes) {
-    textXl = 9;
+    textColspan = 9;
   }
 
   return (
     <Grid direction="row" justifyContent="flex-start" alignItems="flex-start" templateColumns="repeat(12, 1fr)" {...props.attributes}>
       {showTimecodes && (
-        <GridItem contentEditable={false} colSpan={1} className={'p-t-2 text-truncate'}>
+        <GridItem contentEditable={false} colSpan={1}>
           <chakra.code
             contentEditable={false}
             userSelect="none"
@@ -101,7 +101,7 @@ export function TimedTextElement({ showSpeakers, showTimecodes, ...props }: Time
         </GridItem>
       )}
       {showSpeakers && (
-        <GridItem contentEditable={false} colSpan={2} className={'p-t-2 text-truncate'}>
+        <GridItem contentEditable={false} colSpan={2}>
           <Text
             noWrap
             contentEditable={false}
@@ -117,9 +117,7 @@ export function TimedTextElement({ showSpeakers, showTimecodes, ...props }: Time
           </Text>
         </GridItem>
       )}
-      <GridItem colSpan={textXl} className={'p-b-1 mx-auto'}>
-        {props.children}
-      </GridItem>
+      <GridItem colSpan={textColspan}>{props.children}</GridItem>
     </Grid>
   );
 }

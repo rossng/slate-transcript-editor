@@ -1,49 +1,69 @@
-import { Text, Tooltip } from '@chakra-ui/react';
+import {
+  Button,
+  List,
+  ListIcon,
+  ListItem,
+  Modal,
+  ModalBody,
+  ModalCloseButton,
+  ModalContent,
+  ModalHeader,
+  ModalOverlay,
+  Text,
+  useDisclosure,
+} from '@chakra-ui/react';
 import React from 'react';
-import { MdInfoOutline, MdKeyboard, MdKeyboardReturn, MdPeople, MdSave } from 'react-icons/md';
+import { MdInfoOutline, MdKeyboard, MdKeyboardReturn, MdMouse, MdPeople, MdSave } from 'react-icons/md';
 import { useTranscriptEditorContext } from '../transcript-editor-context';
 
 export function Instructions(): JSX.Element {
   const context = useTranscriptEditorContext();
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
-    <Tooltip
-      enterDelay={100}
-      label={
-        <Text>
-          {!context.isEditable && (
-            <>
-              You are in read only mode. <br />
-            </>
-          )}
-          Double click on a word or time stamp to jump to the corresponding point in the media. <br />
-          {context.isEditable && (
-            <>
-              <MdKeyboard /> Start typing to edit text.
-              <br />
-              <MdPeople /> You can add and change names of speakers in your transcript.
-              <br />
-              <MdKeyboardReturn /> Hit enter in between words to split a paragraph.
-              <br />
-              <MdSave />
-              Remember to save regularly.
-              <br />
-            </>
-          )}
-          <MdSave /> Export to get a copy.
-        </Text>
-      }
-    >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-        }}
-      >
-        <MdInfoOutline fontSize="small" color="primary" />
-        <Text>How Does this work?</Text>
-      </div>
-    </Tooltip>
+    <>
+      <Button onClick={onOpen}>
+        <MdInfoOutline size={24} color="primary" aria-hidden />
+        <Text ml={2}>How does this work?</Text>
+      </Button>
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Modal Title</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={4}>
+            {!context.isEditable && <Text>You are in read only mode.</Text>}
+            {context.isEditable && (
+              <List>
+                <ListItem>
+                  <ListIcon as={MdMouse} />
+                  Double click on a word or time stamp to jump to the corresponding point in the media.
+                </ListItem>
+                <ListItem>
+                  <ListIcon as={MdKeyboard} />
+                  Start typing to edit text.
+                </ListItem>
+                <ListItem>
+                  <ListIcon as={MdPeople} />
+                  You can add and change names of speakers in your transcript.
+                </ListItem>
+                <ListItem>
+                  <ListIcon as={MdKeyboardReturn} />
+                  Hit enter in between words to split a paragraph.
+                </ListItem>
+                <ListItem>
+                  <ListIcon as={MdSave} />
+                  Remember to save regularly.
+                </ListItem>
+                <ListItem>
+                  <ListIcon as={MdSave} />
+                  Export to get a copy.
+                </ListItem>
+              </List>
+            )}
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+    </>
   );
 }

@@ -1,4 +1,4 @@
-import { Switch, Text, Tooltip } from '@chakra-ui/react';
+import { Flex, FormControl, FormLabel, Switch, Tooltip } from '@chakra-ui/react';
 import React from 'react';
 import { useTranscriptEditorContext } from '../../misc/transcript-editor-context';
 
@@ -20,19 +20,16 @@ export function AutoPauseControl(): JSX.Element {
     <>
       {isEditable && (
         <Tooltip
-          enterDelay={3000}
-          label={
-            <Text>
-              {`Turn ${isPauseWhileTyping ? 'off' : 'on'} pause while typing functionality. As
+          label={`Turn ${isPauseWhileTyping ? 'off' : 'on'} pause while typing functionality. As
           you start typing the media while pause playback until you stop. Not
           recommended on longer transcript as it might present performance issues.`}
-            </Text>
-          }
         >
-          <Text>
-            <Switch color="primary" isChecked={isPauseWhileTyping} onChange={handleSetPauseWhileTyping} />
-            Pause media while typing
-          </Text>
+          <FormControl>
+            <Flex alignItems="center">
+              <FormLabel>Pause media while typing</FormLabel>
+              <Switch color="primary" isChecked={isPauseWhileTyping} onChange={handleSetPauseWhileTyping} />
+            </Flex>
+          </FormControl>
         </Tooltip>
       )}
     </>
