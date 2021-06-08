@@ -8,7 +8,7 @@ import assert from 'assert';
 import { BaseEditor, Element } from 'slate';
 import { HistoryEditor } from 'slate-history';
 import { ReactEditor } from 'slate-react';
-import countWords from '../../util/count-words';
+import { countWords } from '../../util/count-words';
 import { alignBlock, isTextAndWordsListChanged } from '../../util/export-adapters/slate-to-dpe/update-timestamps/update-blocks-timestamps';
 import SlateHelpers from '../index';
 import { isBeginningOfTheBlock } from './is-beginning-of-the-block';

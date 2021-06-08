@@ -1,7 +1,7 @@
 import { escapeText } from './util/escape-text';
 import { formatSeconds } from './util/format-seconds';
 
-export function ttmlGenerator(vttJSON: any): string {
+export function ttmlGenerator(vttJSON: { start: number; end: number; speaker: string; text: string }[]): string {
   let ttmlOut = `<?xml version="1.0" encoding="UTF-8"?>
     <tt xmlns="http://www.w3.org/ns/ttml">
     <head></head>

@@ -1,8 +1,8 @@
 import { action } from '@storybook/addon-actions';
 import React, { useEffect, useState } from 'react';
 import { DefaultLayout } from '../components/default-layout';
-import { TranscriptData } from '../components/editor/transcript-editor';
 import DEMO_SOLEIO_LIVE from '../sample-data/segmented-transcript-soleio-dpe.json';
+import { TranscriptData } from '../util/dpe-to-slate';
 
 const DEMO_MEDIA_URL_SOLEIO =
   'https://digital-paper-edit-demo.s3.eu-west-2.amazonaws.com/PBS-Frontline/The+Facebook+Dilemma+-+interviews/The+Facebook+Dilemma+-+Soleio+Cuervo-OIAUfZBd_7w.mp4';
@@ -16,15 +16,15 @@ const Example = (props: any): JSX.Element => {
   useEffect(() => {
     props.transcriptInParts &&
       props.transcriptInParts.forEach(
-        delayLoop((transcriptPart) => {
+        delayLoop((transcriptPart: any) => {
           setInterimResults(transcriptPart);
         }, 3000)
       );
   }, []);
 
   // https://travishorn.com/delaying-foreach-iterations-2ebd4b29ad30
-  const delayLoop = (fn, delay) => {
-    return (x, i) => {
+  const delayLoop = (fn: any, delay: any) => {
+    return (x: any, i: number) => {
       setTimeout(() => {
         fn(x);
       }, i * delay);

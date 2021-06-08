@@ -7,7 +7,7 @@ import assert from 'assert';
 import * as R from 'ramda';
 import { Descendant } from 'slate';
 import { TranscriptWord } from 'types/slate';
-import countWords from '../../count-words';
+import { countWords } from '../../count-words';
 
 /**
  * Transposes the timecodes from stt json list of words onto

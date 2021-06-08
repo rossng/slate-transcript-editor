@@ -1,6 +1,6 @@
 import { formatSeconds } from './util/format-seconds';
 
-export function csvGenerator(srtJsonContent: any): string {
+export function csvGenerator(srtJsonContent: { start: number; end: number; speaker: string; text: string }[]): string {
   let lines = 'N, In, Out, Text\n';
   srtJsonContent.forEach((srtLineO: any, index: number) => {
     lines += `${index + 1},`;

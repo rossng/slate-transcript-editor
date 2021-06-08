@@ -1,14 +1,15 @@
 import assert from 'assert';
 import { Descendant } from 'slate';
 import { TranscriptWord } from 'types/slate';
-import { TranscriptParagraph } from 'util/dpe-to-slate';
 import { CaptionType } from '..';
-import countWords from '../../count-words';
-import { csvGenerator } from './compose-subtitles/csv.js';
-import { ittGenerator } from './compose-subtitles/itt.js';
+import { countWords } from '../../count-words';
+import { TranscriptParagraph } from '../../dpe-to-slate';
+import { csvGenerator } from './compose-subtitles/csv';
+import { ittGenerator } from './compose-subtitles/itt';
 import { ttmlGeneratorPremiere } from './compose-subtitles/premiere';
 import { srtGenerator } from './compose-subtitles/srt';
 import { ttmlGenerator } from './compose-subtitles/ttml';
+import { formatSeconds } from './compose-subtitles/util/format-seconds';
 import { vttGenerator } from './compose-subtitles/vtt';
 import { getTextFromWordsList, preSegmentText } from './presegment-text';
 import { divideIntoTwoLines } from './presegment-text/divide-into-two-lines';
@@ -60,7 +61,7 @@ function addTimecodesToLines(wordsList: TranscriptWord[], paragraphs: Omit<Trans
 
       startWordCounter = endWordCounter;
 
-      return { jsonLine, speaker: possibleParagraphs.length > 0 ? possibleParagraphs[0].speaker : 'UNKNOWN' };
+      return { ...jsonLine, speaker: possibleParagraphs.length > 0 ? possibleParagraphs[0].speaker : 'UNKNOWN' };
     });
 
   return results;
@@ -111,17 +112,16 @@ export function subtitlesComposer({
   numberOfCharPerLine?: number;
   slateValue: Descendant[];
 }): any {
-  let subtitlesJson;
-  if (type === 'vtt_speakers_paragraphs') {
-    subtitlesJson = convertSlateValueToSubtitleJson(slateValue);
-  } else {
-    subtitlesJson = preSegmentTextJson({
-      wordsList: words,
-      paragraphs,
-      numberOfCharPerLine,
-    });
-    console.log('subtitlesJson', subtitlesJson);
-  }
+  const subtitlesJson =
+    type === 'vtt_speakers_paragraphs'
+      ? convertSlateValueToSubtitleJson(slateValue)
+      : preSegmentTextJson({
+          wordsList: words,
+          paragraphs,
+          numberOfCharPerLine,
+        });
+
+  console.log('subtitlesJson', subtitlesJson);
 
   if (typeof words === 'string') {
     return preSegmentText(words, numberOfCharPerLine);
@@ -141,14 +141,15 @@ export function subtitlesComposer({
       return vttGenerator(subtitlesJson, true);
     case 'vtt_speakers_paragraphs':
       return vttGenerator(subtitlesJson, true);
-    // case 'json':
-    //   // converting timecodes to captions time stamps
-    //   return subtitlesJson.map((line) => {
-    //     // assert(!('jsonLine' in line));
-    //     line.start = formatSeconds(parseFloat(line.start)).replace('.', ',');
-    //     line.end = formatSeconds(parseFloat(line.end)).replace('.', ',');
-    //     return line;
-    //   });
+    case 'json':
+      // converting timecodes to captions time stamps
+      return subtitlesJson.map((line) => {
+        return {
+          ...line,
+          start: formatSeconds(line.start).replace('.', ','),
+          end: formatSeconds(line.end).replace('.', ','),
+        };
+      });
     case 'csv':
       return csvGenerator(subtitlesJson);
     case 'pre-segment-txt':

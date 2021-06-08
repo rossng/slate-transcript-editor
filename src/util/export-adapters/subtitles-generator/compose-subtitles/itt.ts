@@ -1,8 +1,12 @@
 import TC from 'smpte-timecode';
 import { escapeText } from './util/escape-text';
-import { tcFormat } from './util/tc-format.js';
+import { tcFormat } from './util/tc-format';
 
-export function ittGenerator(vttJSON: any, lang = 'en-GB', FPS: TC.FRAMERATE = 25): string {
+export function ittGenerator(
+  vttJSON: { start: number; end: number; speaker: string; text: string }[],
+  lang = 'en-GB',
+  FPS: TC.FRAMERATE = 25
+): string {
   let ittOut = `<?xml version="1.0" encoding="UTF-8"?>
         <tt
           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"

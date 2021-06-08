@@ -2,7 +2,7 @@ import assert from 'assert';
 import { Descendant, Element } from 'slate';
 import { alignSTT } from 'stt-align-node';
 import { TranscriptWord } from 'types/slate';
-import countWords from '../../../count-words';
+import { countWords } from '../../../count-words';
 import { TranscriptData } from '../../../dpe-to-slate';
 import { shortTimecode } from '../../../timecode-converter';
 
