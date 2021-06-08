@@ -5,31 +5,34 @@
  */
 // import getClosestBlock from '../get-closest-block';
 import assert from 'assert';
-import { Element } from 'slate';
+import { BaseEditor, Element } from 'slate';
+import { HistoryEditor } from 'slate-history';
+import { ReactEditor } from 'slate-react';
 import countWords from '../../util/count-words';
 import { alignBlock, isTextAndWordsListChanged } from '../../util/export-adapters/slate-to-dpe/update-timestamps/update-blocks-timestamps';
 import SlateHelpers from '../index';
-import isBeginningOftheBlock from './is-beginning-of-the-block.js';
-import isEndOftheBlock from './is-end-of-the-block.js';
-import isSameBlock from './is-same-block';
-import isSelectionCollapsed from './is-selection-collapsed';
-import isTextSameAsWordsList from './is-text-same-as-words-list';
-import splitTextAtOffset from './split-text-at-offset';
+import { isBeginningOfTheBlock } from './is-beginning-of-the-block';
+import { isEndOfTheBlock } from './is-end-of-the-block';
+import { isSameBlock } from './is-same-block';
+import { isSelectionCollapsed } from './is-selection-collapsed';
+import { isTextSameAsWordsList } from './is-text-same-as-words-list';
+import { splitTextAtOffset } from './split-text-at-offset';
 import splitWordsListAtOffset from './split-words-list-at-offset';
 
 /**
  *
  * @param {*} editor slate editor
- * @return {boolean} - to signal if it was suscesfull at splitting to a parent function
+ * @return {boolean} - to signal if it was successful at splitting to a parent function
  */
-function handleSplitParagraph(editor) {
+export function handleSplitParagraph(editor: BaseEditor & ReactEditor & HistoryEditor): boolean {
   // get char offset
+  assert(editor.selection);
   const { anchor, focus } = editor.selection;
   const { offset: anchorOffset, path: anchorPath } = anchor;
   const { offset: focusOffset, path: focusPath } = focus;
 
   if (isSameBlock(anchorPath, focusPath)) {
-    if (isBeginningOftheBlock(anchorOffset, focusOffset)) {
+    if (isBeginningOfTheBlock(anchorOffset, focusOffset)) {
       console.info('in the same block, but at the beginning of a paragraph for now you are not allowed to create an empty new line');
       return false;
     }
@@ -43,7 +46,7 @@ function handleSplitParagraph(editor) {
       let currentBlockWords = currentBlockNode.children[0].words;
       let text = currentBlockNode.children[0].text;
 
-      if (isEndOftheBlock({ anchorOffset, focusOffset, totlaChar: text.split('').length })) {
+      if (isEndOfTheBlock({ anchorOffset, focusOffset, totalChar: text.split('').length })) {
         console.info('in the same block, but at the end of a paragraph for now you are not allowed to create an empty new line');
         return false;
       }
@@ -64,8 +67,8 @@ function handleSplitParagraph(editor) {
       const [wordsBefore, wordsAfter] = splitWordsListAtOffset(currentBlockWords, numberOfWordsBefore);
       // if cursor in the middle of a word then move cursor to space just before
 
-      const isCaretInMiddleOfAword = isTextSameAsWordsList(textBefore, wordsBefore);
-      if (isCaretInMiddleOfAword) {
+      const isCaretInMiddleOfAWord = isTextSameAsWordsList(textBefore, wordsBefore);
+      if (isCaretInMiddleOfAWord) {
         return false;
       }
       // get start time of first block
@@ -87,7 +90,7 @@ function handleSplitParagraph(editor) {
       });
 
       //delete original block
-      SlateHelpers.removeNodes({ editor });
+      SlateHelpers.removeNodes({ editor, options: {} });
       // insert these two blocks
       SlateHelpers.insertNodesAtSelection({
         editor,
@@ -97,13 +100,12 @@ function handleSplitParagraph(editor) {
       return true;
     } else {
       console.info('in same block but with wide selection, not handling this use case for now, and collapsing the selection instead');
-      SlateHelpers.collapseSelectionToAsinglePoint(editor);
+      SlateHelpers.collapseSelectionToASinglePoint(editor);
       return false;
     }
   } else {
     console.info('in different block, not handling this use case for now, and collapsing the selection instead');
-    SlateHelpers.collapseSelectionToAsinglePoint(editor);
+    SlateHelpers.collapseSelectionToASinglePoint(editor);
     return false;
   }
 }
-export default handleSplitParagraph;

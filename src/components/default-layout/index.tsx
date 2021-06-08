@@ -1,7 +1,8 @@
 import { Box, ChakraProvider, extendTheme, Flex, Heading } from '@chakra-ui/react';
 import React, { PropsWithChildren, useEffect } from 'react';
 import { Descendant } from 'slate';
-import { TranscriptData, TranscriptEditor } from '../editor/transcript-editor';
+import { TranscriptData } from '../../util/dpe-to-slate';
+import { TranscriptEditor } from '../editor/transcript-editor';
 import { AutoPauseControl } from '../media/auto-pause-control';
 import { MediaPlayer } from '../media/media-player';
 import { SeekControls } from '../media/seek-controls';
@@ -50,7 +51,11 @@ export function DefaultLayout(props: PropsWithChildren<Props>): JSX.Element {
       transcriptDataLive={props.transcriptDataLive}
     >
       <MediaPlayerContextProvider>
-        <DefaultLayoutInner showSpeakers={props.showSpeakers} showTimecodes={props.showTimecodes} showTitle={props.showTitle} />
+        <DefaultLayoutInner
+          showSpeakers={props.showSpeakers ?? DefaultLayout.defaultProps.showSpeakers}
+          showTimecodes={props.showTimecodes ?? DefaultLayout.defaultProps.showTimecodes}
+          showTitle={props.showTitle ?? DefaultLayout.defaultProps.showTitle}
+        />
       </MediaPlayerContextProvider>
     </TranscriptEditorContextProvider>
   );

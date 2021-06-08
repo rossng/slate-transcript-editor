@@ -1,9 +1,9 @@
+import assert from 'assert';
 import { AlignmentType, Document, HeadingLevel, Packer, Paragraph, TextRun } from 'docx';
-import { Node } from 'slate';
+import { Descendant, Node } from 'slate';
 import { shortTimecode } from '../../timecode-converter';
-export default slateToDocx;
 
-function slateToDocx({
+export function slateToDocx({
   value,
   speakers,
   timecodes,
@@ -12,7 +12,16 @@ function slateToDocx({
   title = 'Transcript',
   creator = 'Slate Transcript Editor',
   description = 'Transcript',
-}) {
+}: {
+  value: Descendant[];
+  speakers: boolean;
+  timecodes: boolean;
+  inlineTimecodes: boolean;
+  hideTitle: boolean;
+  title: string;
+  creator?: string;
+  description?: string;
+}): string {
   const paragraphs: Paragraph[] = [];
 
   if (!hideTitle) {
@@ -29,6 +38,8 @@ function slateToDocx({
 
   value.forEach((slateParagraph) => {
     // TODO: use timecode converter module to convert from seconds to timecode
+
+    assert('type' in slateParagraph && slateParagraph.type === 'timedText');
 
     const paragraphSpeakerTimecodes = new Paragraph({});
 
@@ -87,7 +98,7 @@ function slateToDocx({
     a.href = window.URL.createObjectURL(blob);
     a.download = filename;
     a.click();
-
-    return blob;
   });
+
+  return '';
 }

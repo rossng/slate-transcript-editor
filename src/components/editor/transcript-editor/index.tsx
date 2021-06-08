@@ -3,7 +3,6 @@ import debounce from 'lodash/debounce';
 import React, { useCallback } from 'react';
 import { Descendant } from 'slate';
 import { DefaultElement, Editable, RenderElementProps, RenderLeafProps, Slate } from 'slate-react';
-import { TranscriptWord } from 'types/slate';
 import SlateHelpers from '../../../slate-helpers';
 import { useMediaPlayerContext } from '../../misc/media-player-context';
 import { useTranscriptEditorContext } from '../../misc/transcript-editor-context';
@@ -11,22 +10,10 @@ import { TimedTextElement } from '../timed-text-element';
 
 const PAUSE_WHILE_TYPING_TIMEOUT_MILLISECONDS = 1500;
 
-const pauseWhileTyping = (current) => {
+function pauseWhileTyping(current: HTMLVideoElement): void {
   current.play();
-};
+}
 const debouncePauseWhileTyping = debounce(pauseWhileTyping, PAUSE_WHILE_TYPING_TIMEOUT_MILLISECONDS);
-
-export interface TranscriptData {
-  words?: TranscriptWord[];
-  paragraphs?: TranscriptParagraph[];
-}
-
-interface TranscriptParagraph {
-  id: number;
-  start: number;
-  end: number;
-  speaker: string;
-}
 
 export function TranscriptEditor({
   showSpeakers,
@@ -81,7 +68,7 @@ export function TranscriptEditor({
   // - splitting paragraph via enter key
   // - merging paragraph via delete
   // - merging paragraphs via deleting across paragraphs
-  const handleOnKeyDown = async (event) => {
+  const handleOnKeyDown = async (event: React.KeyboardEvent<HTMLDivElement>) => {
     setIsContentModified(true);
     setIsContentSaved(false);
     //  ArrowRight ArrowLeft ArrowUp ArrowUp

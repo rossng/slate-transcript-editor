@@ -1,41 +1,30 @@
-import { TranscriptData } from 'components/editor/transcript-editor';
 import { Descendant } from 'slate';
-/**
- *
- * `generatePreviousTimingsUpToCurrent` is used to
- *  add a `previousTimings` data attribute
- * to the paragraph `TimedTextElement` in `renderElement`
- * This makes it possible to do css injection to hilight current timings
- * `.timecode[data-previous-timings*="${listOfPreviousTimingsUpToCurrentOne}"]
- *
- * where `listOfPreviousTimingsUpToCurrentOne` is dinamically generated up to the current one.
- * eg if current time is `3` then `listOfPreviousTimingsUpToCurrentOne` "0 1 2"
- */
-import getWordsForParagraph from '../get-words-for-paragraph';
+import { TranscriptWord } from 'types/slate';
+import { getWordsForParagraph } from '../get-words-for-paragraph';
 import { shortTimecode } from '../timecode-converter';
 
-/**
- * splices a list of times, int, up to a certain, index current time.
- * eg  `totalTimingsInt` is [0, 1, 2, 3, 4, 5] and `time` is 3, it retusn "0 1 2"
- * then it returns
- * param {Array} totalTimingsInt -  list of timings int, generated with `generatePreviousTimings`
- * param {Number} time - float, time in seconds
- * returns {String}
- */
-
-function isEmpty(obj) {
-  return Object.keys(obj).length === 0;
-}
-
-const generateText = (paragraph, words) => {
+function generateText(paragraph: TranscriptParagraph, words: TranscriptWord[]): string {
   return words
     .filter((word) => word.start >= paragraph.start && word.end <= paragraph.end)
     .map((w) => w.text)
     .join(' ');
-};
+}
 
-const convertDpeToSlate = (transcript: TranscriptData): Descendant[] => {
-  if (isEmpty(transcript)) {
+export interface TranscriptData {
+  words?: TranscriptWord[];
+  paragraphs?: TranscriptParagraph[];
+}
+
+export interface TranscriptParagraph {
+  id: number;
+  start: number;
+  end: number;
+  speaker: string;
+}
+
+export function convertDpeToSlate(transcript: TranscriptData): Descendant[] {
+  const { words, paragraphs } = transcript;
+  if (!words || !paragraphs) {
     return [
       {
         speaker: 'U_UKN',
@@ -53,8 +42,6 @@ const convertDpeToSlate = (transcript: TranscriptData): Descendant[] => {
     ];
   }
 
-  const { words, paragraphs } = transcript;
-
   return paragraphs.map((paragraph) => ({
     speaker: paragraph.speaker,
     start: paragraph.start,
@@ -69,6 +56,4 @@ const convertDpeToSlate = (transcript: TranscriptData): Descendant[] => {
       },
     ],
   }));
-};
-
-export default convertDpeToSlate;
+}

@@ -1,7 +1,7 @@
 import { Button, Divider, Flex, Link, Menu, MenuButton, MenuGroup, MenuItem, MenuList, Tooltip, VisuallyHidden } from '@chakra-ui/react';
 import React, { PropsWithChildren } from 'react';
 import { MdImportExport, MdInsertEmoticon, MdKeyboardArrowDown, MdMusicNote, MdRedo, MdSave, MdUndo } from 'react-icons/md';
-import subtitlesExportOptionsList from '../../../util/export-adapters/subtitles-generator/list.js';
+import { subtitlesExportOptionsList } from '../../../util/export-adapters/subtitles-generator/list';
 import { useTranscriptEditorContext } from '../../misc/transcript-editor-context';
 
 const REPLACE_WHOLE_TEXT_INSTRUCTION = `Replace whole text.

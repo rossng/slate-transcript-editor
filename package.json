@@ -46,6 +46,7 @@
     "@types/ramda": "^0.27.40",
     "@types/react": "^17.0.9",
     "@types/sbd": "^1.0.1",
+    "@types/smpte-timecode": "^1.2.1",
     "docx": "^6.0.3",
     "fontsource-roboto": "^4.0.0",
     "framer-motion": "^4.1.17",

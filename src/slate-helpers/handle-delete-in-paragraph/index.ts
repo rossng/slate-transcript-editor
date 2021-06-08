@@ -1,24 +1,27 @@
 import assert from 'assert';
-import { Element, Location } from 'slate';
+import { BaseEditor, Element, Location } from 'slate';
+import { HistoryEditor } from 'slate-history';
+import { ReactEditor } from 'slate-react';
 import { alignBlock, isTextAndWordsListChanged } from '../../util/export-adapters/slate-to-dpe/update-timestamps/update-blocks-timestamps';
-import isBeginningOftheBlock from '../handle-split-paragraph/is-beginning-of-the-block';
-import isSameBlock from '../handle-split-paragraph/is-same-block';
-import isSelectionCollapsed from '../handle-split-paragraph/is-selection-collapsed';
+import { isBeginningOfTheBlock } from '../handle-split-paragraph/is-beginning-of-the-block';
+import { isSameBlock } from '../handle-split-paragraph/is-same-block';
+import { isSelectionCollapsed } from '../handle-split-paragraph/is-selection-collapsed';
 import SlateHelpers from '../index';
 
 /**
  *
- * @return {boolean} - to signal if it was suscesfull at splitting to a parent function
+ * @return {boolean} - to signal if it was successful at splitting to a parent function
  */
-// TODO: refacto clean up to make more legibl
-function handleDeleteInParagraph({ editor, event }) {
+// TODO: refactor clean up to make more legible
+export function handleDeleteInParagraph({ editor, event }: { editor: BaseEditor & ReactEditor & HistoryEditor; event: any }): boolean {
+  assert(editor.selection);
   const { anchor, focus } = editor.selection;
 
   const { offset: anchorOffset, path: anchorPath } = anchor;
   const { offset: focusOffset, path: focusPath } = focus;
 
   if (isSameBlock(anchorPath, focusPath)) {
-    if (isBeginningOftheBlock(anchorOffset, focusOffset)) {
+    if (isBeginningOfTheBlock(anchorOffset, focusOffset)) {
       event.preventDefault();
       console.info('in the same block, but at the beginning of a paragraph for now you are not allowed to create an empty new line');
       const [blockNode, path] = SlateHelpers.getClosestBlock(editor);
@@ -29,7 +32,7 @@ function handleDeleteInParagraph({ editor, event }) {
       }
 
       const previousBlockNumber = currentBlockNumber - 1;
-      const previousBlock = SlateHelpers.getNodebyPath({
+      const previousBlock = SlateHelpers.getNodeByPath({
         editor,
         path: [previousBlockNumber],
       });
@@ -113,9 +116,7 @@ function handleDeleteInParagraph({ editor, event }) {
   } else {
     event.preventDefault();
     console.info('in different block, not handling this use case for now, and collapsing the selection instead');
-    SlateHelpers.collapseSelectionToAsinglePoint(editor);
+    SlateHelpers.collapseSelectionToASinglePoint(editor);
     return false;
   }
 }
-
-export default handleDeleteInParagraph;

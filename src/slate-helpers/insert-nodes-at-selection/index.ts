@@ -19,6 +19,7 @@ Transforms.insertNodes(editor, [
 const nextPoint = Editor.after(editor, editor.selection.anchor);
 Editor.setSelection(editor, {anchor:nextPoint, focus:nextPoint})
 */
+import assert from 'assert';
 import { Editor, Location, Node, NodeMatch, Transforms } from 'slate';
 
 /**
@@ -26,7 +27,7 @@ import { Editor, Location, Node, NodeMatch, Transforms } from 'slate';
  * @param {*} editor
  * @param {array} - list of slateJS blocks objects
  */
-function insertNodesAtSelection({
+export function insertNodesAtSelection({
   editor,
   blocks,
   moveSelection = false,
@@ -43,13 +44,12 @@ function insertNodesAtSelection({
     select?: boolean;
     voids?: boolean;
   };
-}) {
+}): void {
   Transforms.insertNodes(editor, [...blocks], options);
   // move selection to that point
   if (moveSelection) {
+    assert(editor.selection);
     const nextPoint = Editor.after(editor, editor.selection.anchor);
     Transforms.setSelection(editor, { anchor: nextPoint, focus: nextPoint });
   }
 }
-
-export default insertNodesAtSelection;

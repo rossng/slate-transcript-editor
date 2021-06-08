@@ -6,20 +6,21 @@
 
 // Note: export adapter does not do any alignment
 // just converts between formats
-import slateToDocx from './docx';
-import convertSlateToDpe from './slate-to-dpe';
-import subtitlesGenerator from './subtitles-generator/index';
-import subtitlesExportOptionsList from './subtitles-generator/list';
-import slateToText from './txt';
+import { Descendant } from 'slate';
+import { slateToDocx } from './docx';
+import { convertSlateToDpe } from './slate-to-dpe';
+import { subtitlesComposer } from './subtitles-generator/index';
+import { subtitlesExportOptionsList } from './subtitles-generator/list';
+import { slateToText } from './txt';
 
 export type ExportData = {
   type: string;
   ext?: any;
-  speakers?: any;
-  timecodes?: any;
-  inlineTimecodes?: any;
+  speakers?: boolean;
+  timecodes?: boolean;
+  inlineTimecodes?: boolean;
   hideTitle?: any;
-  atlasFormat?: any;
+  atlasFormat?: boolean;
   isDownload?: boolean;
   slateValue?: any;
   transcriptTitle?: any;
@@ -29,11 +30,42 @@ const captionTypeList = subtitlesExportOptionsList.map((list) => {
   return list.type;
 });
 
-export const isCaptionType = (type) => {
-  const res = captionTypeList.includes(type);
-  return res;
-};
-const exportAdapter = ({ slateValue, type, ext, transcriptTitle, speakers, timecodes, inlineTimecodes, hideTitle, atlasFormat }: ExportData) => {
+export type CaptionType =
+  | 'vtt_speakers_paragraphs'
+  | 'premiereTTML'
+  | 'ttml'
+  | 'itt'
+  | 'srt'
+  | 'vtt'
+  | 'vtt_speakers'
+  | 'json'
+  | 'csv'
+  | 'pre-segment-txt'
+  | 'txt';
+
+export function isCaptionType(value: string): value is CaptionType {
+  return captionTypeList.includes(value);
+}
+
+export function exportAdapter({
+  slateValue,
+  type,
+  transcriptTitle,
+  speakers,
+  timecodes,
+  inlineTimecodes,
+  hideTitle,
+  atlasFormat,
+}: {
+  slateValue: Descendant[];
+  type: string;
+  transcriptTitle: string;
+  speakers: any;
+  timecodes: any;
+  inlineTimecodes: any;
+  hideTitle: any;
+  atlasFormat: boolean;
+}): any {
   switch (type) {
     case 'text':
       return slateToText({ value: slateValue, speakers, timecodes, atlasFormat });
@@ -54,7 +86,7 @@ const exportAdapter = ({ slateValue, type, ext, transcriptTitle, speakers, timec
     default:
       if (isCaptionType(type)) {
         const editorContent = convertSlateToDpe(slateValue);
-        const subtitlesJson = subtitlesGenerator({
+        const subtitlesJson = subtitlesComposer({
           words: editorContent.words,
           paragraphs: editorContent.paragraphs,
           type,
@@ -66,6 +98,4 @@ const exportAdapter = ({ slateValue, type, ext, transcriptTitle, speakers, timec
       console.error('Did not recognise the export format ', type);
       return 'Did not recognise the export format';
   }
-};
-
-export default exportAdapter;
+}

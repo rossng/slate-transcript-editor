@@ -1,6 +1,7 @@
 import { chakra, Grid, GridItem, GridProps, Text } from '@chakra-ui/react';
+import assert from 'assert';
 import React, { useCallback } from 'react';
-import { Editor, Element, Transforms } from 'slate';
+import { Editor, Element, Node, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { useMediaPlayerContext } from '../../misc/media-player-context';
 import { useTranscriptEditorContext } from '../../misc/transcript-editor-context';
@@ -47,7 +48,10 @@ export function TimedTextElement({ showSpeakers, showTimecodes, ...props }: Time
               { type: 'timedText', speaker: newSpeakerName },
               {
                 at: rangeForTheWholeEditor,
-                match: (node: Element) => node.type === 'timedText' && node.speaker.toLowerCase() === oldSpeakerName.toLowerCase(),
+                match: (node: Node) => {
+                  assert('type' in node && node.type === 'timedText');
+                  return node.type === 'timedText' && node.speaker.toLowerCase() === oldSpeakerName.toLowerCase();
+                },
               }
             );
           } else {
@@ -111,7 +115,7 @@ export function TimedTextElement({ showSpeakers, showTimecodes, ...props }: Time
             textTransform="uppercase"
             className={'text-truncate text-muted'}
             title={props.element.speaker}
-            onClick={handleSetSpeakerName.bind(this, props.element)}
+            onClick={() => handleSetSpeakerName(props.element)}
           >
             {props.element.speaker}
           </Text>

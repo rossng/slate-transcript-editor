@@ -8,10 +8,14 @@ from https://github.com/ianstormtaylor/slate/blob/228f4fa94f61f42ca41feae2b3029e
  });
  return startBlock;
 */
-import { Ancestor, Editor, Path } from 'slate';
+import assert from 'assert';
+import { Ancestor, BaseEditor, Editor, Path } from 'slate';
+import { HistoryEditor } from 'slate-history';
+import { ReactEditor } from 'slate-react';
 
-function getClosestBlock(editor): [Ancestor, Path] {
-  const [blockNode, path] = Editor.above(editor, { match: (n) => Editor.isBlock(editor, n) });
-  return [blockNode, path];
+function getClosestBlock(editor: BaseEditor & ReactEditor & HistoryEditor): [Ancestor, Path] {
+  const closest = Editor.above(editor, { match: (n) => Editor.isBlock(editor, n) });
+  assert(closest);
+  return closest;
 }
 export default getClosestBlock;

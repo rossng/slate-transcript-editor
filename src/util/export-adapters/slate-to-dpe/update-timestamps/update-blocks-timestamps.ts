@@ -3,7 +3,7 @@ import * as R from 'ramda';
 import { Descendant, Element } from 'slate';
 import { alignSTT } from 'stt-align-node';
 import { TranscriptWord } from 'types/slate';
-import convertWordsToText from '../../../convert-words-to-text';
+import { convertWordsToText } from '../../../convert-words-to-text';
 import { countChar, removeExtraWhiteSpaces, splitOnWhiteSpaces } from '../../../count-words';
 
 export function isTextAndWordsListChanged({ text, words }: { text: any; words: TranscriptWord[] }): boolean {

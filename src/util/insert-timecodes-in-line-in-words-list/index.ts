@@ -1,4 +1,5 @@
-import { shortTimecode } from '../timecode-converter';
+import * as R from 'ramda';
+import { Element } from 'slate';
 /**
  * Helper function for OHMS format
  * OHMS is an open source indexing tool created by the University of Kentucky,
@@ -8,12 +9,10 @@ import { shortTimecode } from '../timecode-converter';
  * `slate-transcript-editor` OHMS export option exports the word part.
  * Thi functions organises the words to add timecodes intervals at the required times.
  */
+import { convertWordsToText } from '../convert-words-to-text';
+import { shortTimecode } from '../timecode-converter';
 
-import convertWordsToText from '../convert-words-to-text';
-import * as R from 'ramda';
-import { Element } from 'slate';
-
-const insertTimecodesInlineinWordsList = ({
+const insertTimecodesInlineInWordsList = ({
   intervalSeconds = 30,
   words,
   lastInsertTime = 0,
@@ -24,7 +23,7 @@ const insertTimecodesInlineinWordsList = ({
 }): [{ start: number; end: number; text: string }[], number] => {
   const tmpWords = R.clone(words);
   const sortedWords = tmpWords.sort((a, b) => a.start - b.start);
-  let newWords: { start: number; end: number; text: string }[] = [];
+  const newWords: { start: number; end: number; text: string }[] = [];
 
   for (const word of sortedWords) {
     if (word.start - lastInsertTime > intervalSeconds) {
@@ -48,7 +47,7 @@ const insertTimecodesInLineInSlateJs = (slateValue: Element[]): Element[] => {
   let lastInsertTime = 0;
   return slateValue.map((block) => {
     const newBlock = JSON.parse(JSON.stringify(block));
-    const [newWords, lastInsert] = insertTimecodesInlineinWordsList({
+    const [newWords, lastInsert] = insertTimecodesInlineInWordsList({
       words: newBlock.children[0].words,
       lastInsertTime,
     });

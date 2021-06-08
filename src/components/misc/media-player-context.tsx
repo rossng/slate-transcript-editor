@@ -1,3 +1,4 @@
+import assert from 'assert';
 import React, { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import SlateHelpers from '../../slate-helpers';
 import { useTranscriptEditorContext } from './transcript-editor-context';
@@ -32,7 +33,9 @@ export function MediaPlayerContextProvider({ children }: PropsWithChildren<Recor
     (e) => {
       setCurrentTime(e.target.currentTime);
       // TODO: setting duration here as a workaround
-      setDuration(mediaRef.current.duration);
+      if (mediaRef.current) {
+        setDuration(mediaRef.current.duration);
+      }
       //  TODO: commenting this out for now, not sure if it will fire to often?
       // if (props.handleAnalyticsEvents) {
       //   // handles if click cancel and doesn't set speaker name
@@ -68,7 +71,7 @@ export function MediaPlayerContextProvider({ children }: PropsWithChildren<Recor
       if (target.classList.contains('timecode')) {
         const start = target.dataset.start;
         if (mediaRef && mediaRef.current) {
-          mediaRef.current.currentTime = parseFloat(start);
+          mediaRef.current.currentTime = parseFloat(start ?? '0');
           mediaRef.current.play();
 
           // handles if click cancel and doesn't set speaker name
@@ -81,9 +84,11 @@ export function MediaPlayerContextProvider({ children }: PropsWithChildren<Recor
       } else if (target.dataset.slateString) {
         const parentNode = target.parentNode as HTMLElement;
         if (parentNode.dataset.start) {
-          const { startWord } = SlateHelpers.getSelectionNodes(editor, editor.selection);
+          const selectionNodes = SlateHelpers.getSelectionNodes(editor, editor.selection);
+          assert(selectionNodes?.startWord);
+          const startWord = selectionNodes.startWord;
           if (mediaRef && mediaRef.current && startWord && startWord.start) {
-            mediaRef.current.currentTime = parseFloat(startWord.start);
+            mediaRef.current.currentTime = startWord.start;
             mediaRef.current.play();
 
             // handles if click cancel and doesn't set speaker name

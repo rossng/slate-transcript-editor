@@ -1,5 +1,5 @@
-import subtitlesGenerator from './index.js';
-import { Word } from './presegment-text/index.js';
+import { subtitlesComposer } from './';
+import { Word } from './presegment-text';
 // import transcript from './sample/words-list.sample.json';
 import transcript from './sample/words-list-2.sample.json';
 const sampleWords = transcript.words;
@@ -15,7 +15,7 @@ function getTextFromWordsList(words: Word[]): string {
 const plainText = getTextFromWordsList(sampleWords);
 console.log(plainText);
 
-const subtitlesJson = subtitlesGenerator({ words: sampleWords, type: 'json' });
+const subtitlesJson = subtitlesComposer({ words: sampleWords, type: 'json', paragraphs: [], slateValue: [] });
 // const ttmlPremiere = subtitlesGenerator({ words: sampleWords, type: 'premiere' });
 // const ittData = subtitlesGenerator({ words: sampleWords, type: 'itt' });
 // const ttmlData = subtitlesGenerator({ words: sampleWords, type: 'ttml' });

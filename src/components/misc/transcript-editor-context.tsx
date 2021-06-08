@@ -4,16 +4,15 @@ import React, { createContext, PropsWithChildren, useCallback, useContext, useEf
 import { BaseEditor, createEditor, Descendant, Transforms } from 'slate';
 import { HistoryEditor, withHistory } from 'slate-history';
 import { ReactEditor, withReact } from 'slate-react';
-import download from '../../util/download';
-import convertDpeToSlate from '../../util/dpe-to-slate';
-import exportAdapter, { ExportData, isCaptionType } from '../../util/export-adapters';
-import plainTextAlignToSlateJs from '../../util/export-adapters/slate-to-dpe/update-timestamps/plain-text-align-to-slate';
+import { download } from '../../util/download';
+import { convertDpeToSlate, TranscriptData } from '../../util/dpe-to-slate';
+import { exportAdapter, ExportData, isCaptionType } from '../../util/export-adapters';
+import { plainTextAlignToSlateJs } from '../../util/export-adapters/slate-to-dpe/update-timestamps/plain-text-align-to-slate';
 import updateBlocksTimestamps from '../../util/export-adapters/slate-to-dpe/update-timestamps/update-blocks-timestamps';
 import insertTimecodesInLineInSlateJs from '../../util/insert-timecodes-in-line-in-words-list';
-import { TranscriptData } from '../editor/transcript-editor';
 
 interface TranscriptEditorCtx {
-  isEditable: boolean;
+  isEditable?: boolean;
   setValue: React.Dispatch<React.SetStateAction<Descendant[]>>;
   value: Descendant[];
   editor: BaseEditor & ReactEditor & HistoryEditor;
@@ -28,7 +27,7 @@ interface TranscriptEditorCtx {
   speakerOptions: string[];
   insertTextInaudible: () => void;
   insertMusicNote: () => void;
-  handleAnalyticsEvents: (eventName: string, properties: { fn: string; [key: string]: any }) => void;
+  handleAnalyticsEvents?: (eventName: string, properties: { fn: string; [key: string]: any }) => void;
   mediaUrl: string;
   handleSave: () => Promise<void>;
   handleExport: (data: ExportData) => Promise<string>;
@@ -226,7 +225,7 @@ export function TranscriptEditorContextProvider({
           timecodes,
           inlineTimecodes,
           hideTitle,
-          atlasFormat,
+          atlasFormat: atlasFormat ?? false,
         });
 
         if (ext === 'json') {
