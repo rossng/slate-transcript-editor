@@ -42,9 +42,10 @@ export function convertDpeToSlate(transcript: TranscriptData): Descendant[] {
     ];
   }
 
-  return paragraphs.map((paragraph) => ({
+  return paragraphs.map((paragraph, index) => ({
     speaker: paragraph.speaker,
     start: paragraph.start,
+    index,
     // pre-computing the display of the formatting here so that it doesn't need to convert it in leaf render
     startTimecode: shortTimecode(paragraph.start),
     type: 'timedText',

@@ -26,7 +26,7 @@ export function TranscriptEditor({
 }): JSX.Element {
   const { setValue, value, setIsContentModified, setIsContentSaved, isPauseWhileTyping, editor, handleAnalyticsEvents, isEditable } =
     useTranscriptEditorContext();
-  const { handleTimedTextClick, mediaRef, currentTime } = useMediaPlayerContext();
+  const { handleTimedTextClick, mediaRef, currentIndex } = useMediaPlayerContext();
 
   const renderElement = useCallback(
     (elementProps: RenderElementProps) => {
@@ -45,16 +45,21 @@ export function TranscriptEditor({
       return (
         <chakra.span
           onDoubleClick={handleTimedTextClick}
-          color={children.props.parent.start > currentTime ? '#9e9e9e' : 'black'}
+          sx={{
+            '&[data-future=true]': {
+              color: '#9e9e9e',
+            },
+          }}
           className="timecode"
           data-start={children.props.parent.start}
+          data-future={children.props.parent.index > currentIndex ? 'true' : 'false'}
           {...attributes}
         >
           {children}
         </chakra.span>
       );
     },
-    [currentTime, handleTimedTextClick]
+    [currentIndex, handleTimedTextClick]
   );
 
   /**
@@ -68,84 +73,89 @@ export function TranscriptEditor({
   // - splitting paragraph via enter key
   // - merging paragraph via delete
   // - merging paragraphs via deleting across paragraphs
-  const handleOnKeyDown = async (event: React.KeyboardEvent<HTMLDivElement>) => {
-    setIsContentModified(true);
-    setIsContentSaved(false);
-    //  ArrowRight ArrowLeft ArrowUp ArrowUp
-    if (event.key === 'Enter') {
-      // intercept Enter, and handle timecodes when splitting a paragraph
-      event.preventDefault();
-      // console.info('For now disabling enter key to split a paragraph, while figuring out the alignment issue');
-      // handleSetPauseWhileTyping();
-      // TODO: Edge case, hit enters after having typed some other words?
-      const isSuccess = SlateHelpers.handleSplitParagraph(editor);
+  const handleOnKeyDown = useCallback(
+    async (event: React.KeyboardEvent<HTMLDivElement>) => {
+      setIsContentModified(true);
+      setIsContentSaved(false);
+      //  ArrowRight ArrowLeft ArrowUp ArrowUp
+      if (event.key === 'Enter') {
+        // intercept Enter, and handle timecodes when splitting a paragraph
+        event.preventDefault();
+        // console.info('For now disabling enter key to split a paragraph, while figuring out the alignment issue');
+        // handleSetPauseWhileTyping();
+        // TODO: Edge case, hit enters after having typed some other words?
+        const isSuccess = SlateHelpers.handleSplitParagraph(editor);
 
-      // handles if click cancel and doesn't set speaker name
-      handleAnalyticsEvents?.('ste_handle_split_paragraph', {
-        fn: 'handleSplitParagraph',
-        isSuccess,
-      });
+        // handles if click cancel and doesn't set speaker name
+        handleAnalyticsEvents?.('ste_handle_split_paragraph', {
+          fn: 'handleSplitParagraph',
+          isSuccess,
+        });
 
-      if (isSuccess) {
-        // as part of splitting paragraphs there's an alignment step
-        // so content is not counted as modified
-        setIsContentModified(false);
+        if (isSuccess) {
+          // as part of splitting paragraphs there's an alignment step
+          // so content is not counted as modified
+          setIsContentModified(false);
+        }
       }
-    }
-    if (event.key === 'Backspace') {
-      const isSuccess = SlateHelpers.handleDeleteInParagraph({ editor: editor, event });
-      // Commenting that out for now, as it might get called too often
-      // if (props.handleAnalyticsEvents) {
-      //   // handles if click cancel and doesn't set speaker name
-      //   props.handleAnalyticsEvents('ste_handle_delete_paragraph', {
-      //     fn: 'handleDeleteInParagraph',
-      //     isSuccess,
-      //   });
+      if (event.key === 'Backspace') {
+        const isSuccess = SlateHelpers.handleDeleteInParagraph({ editor: editor, event });
+        // Commenting that out for now, as it might get called too often
+        // if (props.handleAnalyticsEvents) {
+        //   // handles if click cancel and doesn't set speaker name
+        //   props.handleAnalyticsEvents('ste_handle_delete_paragraph', {
+        //     fn: 'handleDeleteInParagraph',
+        //     isSuccess,
+        //   });
+        // }
+        if (isSuccess) {
+          // as part of splitting paragraphs there's an alignment step
+          // so content is not counted as modified
+          setIsContentModified(false);
+        }
+      }
+      // if (event.key.length == 1 && ((event.keyCode >= 65 && event.keyCode <= 90) || (event.keyCode >= 49 && event.keyCode <= 57))) {
+      //   const alignedSlateData = await debouncedSave(value);
+      //   setValue(alignedSlateData);
+      //   setIsContentIsModified(false);
       // }
-      if (isSuccess) {
-        // as part of splitting paragraphs there's an alignment step
-        // so content is not counted as modified
-        setIsContentModified(false);
-      }
-    }
-    // if (event.key.length == 1 && ((event.keyCode >= 65 && event.keyCode <= 90) || (event.keyCode >= 49 && event.keyCode <= 57))) {
-    //   const alignedSlateData = await debouncedSave(value);
-    //   setValue(alignedSlateData);
-    //   setIsContentIsModified(false);
-    // }
 
-    if (isPauseWhileTyping) {
-      // logic for pause while typing
-      // https://schier.co/blog/wait-for-user-to-stop-typing-using-javascript
-      // TODO: currently eve the video was paused, and pause while typing is on,
-      // it will play it when stopped typing. so added btn to turn feature on off.
-      // and disabled as default.
-      // also pause while typing might introduce performance issues on longer transcripts
-      // if on every keystroke it's creating and destroying a timer.
-      // should find a more efficient way to "debounce" or "throttle" this functionality
-      if (mediaRef && mediaRef.current && !mediaRef.current.paused) {
-        mediaRef.current.pause();
-        debouncePauseWhileTyping(mediaRef.current);
+      if (isPauseWhileTyping) {
+        // logic for pause while typing
+        // https://schier.co/blog/wait-for-user-to-stop-typing-using-javascript
+        // TODO: currently eve the video was paused, and pause while typing is on,
+        // it will play it when stopped typing. so added btn to turn feature on off.
+        // and disabled as default.
+        // also pause while typing might introduce performance issues on longer transcripts
+        // if on every keystroke it's creating and destroying a timer.
+        // should find a more efficient way to "debounce" or "throttle" this functionality
+        if (mediaRef && mediaRef.current && !mediaRef.current.paused) {
+          mediaRef.current.pause();
+          debouncePauseWhileTyping(mediaRef.current);
+        }
       }
-    }
-    // auto align when not typing
-  };
+      // auto align when not typing
+    },
+    [editor, handleAnalyticsEvents, isPauseWhileTyping, mediaRef, setIsContentModified, setIsContentSaved]
+  );
+
+  const onChange = useCallback(
+    (value: Descendant[]) => {
+      if (handleAutoSaveChanges) {
+        handleAutoSaveChanges(value);
+        setIsContentSaved(true);
+      }
+      return setValue(value);
+    },
+    [handleAutoSaveChanges, setIsContentSaved, setValue]
+  );
+
   return (
     <Box>
       {value.length !== 0 ? (
         <>
           <chakra.section fontFamily="Roboto, sans-serif" padding="8px 16px" h="85vh" overflow="auto">
-            <Slate
-              editor={editor}
-              value={value}
-              onChange={(value) => {
-                if (handleAutoSaveChanges) {
-                  handleAutoSaveChanges(value);
-                  setIsContentSaved(true);
-                }
-                return setValue(value);
-              }}
-            >
+            <Slate editor={editor} value={value} onChange={onChange}>
               <Editable
                 readOnly={typeof isEditable === 'boolean' ? !isEditable : false}
                 renderElement={renderElement}

@@ -1,10 +1,11 @@
 import { Text } from '@chakra-ui/react';
 import React from 'react';
 import { shortTimecode } from '../../../util/timecode-converter';
-import { useMediaPlayerContext } from '../../misc/media-player-context';
+import { useMediaPlayerContext, useMediaPlayerTime } from '../../misc/media-player-context';
 
 export function TimecodeDisplay(): JSX.Element {
-  const { currentTime, duration } = useMediaPlayerContext();
+  const { duration } = useMediaPlayerContext();
+  const currentTime = useMediaPlayerTime();
 
   return (
     <Text>

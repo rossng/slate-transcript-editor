@@ -11,8 +11,8 @@ const createSlateContentFromSlateJsParagraphs = (currentContent: Descendant[], n
   const updatedBlockArray = [];
   let totalWords = 0;
 
-  for (const blockIndex in currentContent) {
-    const block = currentContent[blockIndex];
+  for (const block in currentContent) {
+    //const block = currentContent[blockIndex];
     assert(Element.isElement(block));
     const text = block.children[0].text;
     // if copy and pasting large chunk of text

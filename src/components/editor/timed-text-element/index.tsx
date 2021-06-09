@@ -16,7 +16,7 @@ export interface TimedTextElementProps {
 
 export function TimedTextElement({ showSpeakers, showTimecodes, ...props }: TimedTextElementProps): JSX.Element {
   const { editor, isEditable, handleAnalyticsEvents } = useTranscriptEditorContext();
-  const { handleTimedTextClick, currentTime } = useMediaPlayerContext();
+  const { handleTimedTextClick, currentIndex } = useMediaPlayerContext();
 
   /**
    * `handleSetSpeakerName` is outside of TimedTextElement
@@ -24,52 +24,49 @@ export function TimedTextElement({ showSpeakers, showTimecodes, ...props }: Time
    * especially on long transcripts
    * @param {*} element - props.element, from `renderElement` function
    */
-  const handleSetSpeakerName = useCallback(
-    (element) => {
-      if (isEditable) {
-        const pathToCurrentNode = ReactEditor.findPath(editor, element);
-        const oldSpeakerName = element.speaker;
-        const newSpeakerName = prompt('Change speaker name', oldSpeakerName);
-        if (newSpeakerName) {
-          const isUpdateAllSpeakerInstances = confirm(`Would you like to replace all occurrences of ${oldSpeakerName} with ${newSpeakerName}?`);
+  const handleSetSpeakerName = useCallback(() => {
+    if (isEditable) {
+      const pathToCurrentNode = ReactEditor.findPath(editor, props.element);
+      const oldSpeakerName = props.element.speaker;
+      const newSpeakerName = prompt('Change speaker name', oldSpeakerName);
+      if (newSpeakerName) {
+        const isUpdateAllSpeakerInstances = confirm(`Would you like to replace all occurrences of ${oldSpeakerName} with ${newSpeakerName}?`);
 
-          // handles if set speaker name, and whether updates one or multiple
-          handleAnalyticsEvents?.('ste_set_speaker_name', {
-            fn: 'handleSetSpeakerName',
-            changeSpeaker: true,
-            updateMultiple: isUpdateAllSpeakerInstances,
-          });
+        // handles if set speaker name, and whether updates one or multiple
+        handleAnalyticsEvents?.('ste_set_speaker_name', {
+          fn: 'handleSetSpeakerName',
+          changeSpeaker: true,
+          updateMultiple: isUpdateAllSpeakerInstances,
+        });
 
-          if (isUpdateAllSpeakerInstances) {
-            const rangeForTheWholeEditor = Editor.range(editor, []);
-            // Apply transformation to the whole doc, where speaker matches old speaker name, and set it to new one
-            Transforms.setNodes(
-              editor,
-              { type: 'timedText', speaker: newSpeakerName },
-              {
-                at: rangeForTheWholeEditor,
-                match: (node: Node) => {
-                  assert('type' in node && node.type === 'timedText');
-                  return node.type === 'timedText' && node.speaker.toLowerCase() === oldSpeakerName.toLowerCase();
-                },
-              }
-            );
-          } else {
-            // only apply speaker name transformation to current element
-            Transforms.setNodes(editor, { type: 'timedText', speaker: newSpeakerName }, { at: pathToCurrentNode });
-          }
+        if (isUpdateAllSpeakerInstances) {
+          const rangeForTheWholeEditor = Editor.range(editor, []);
+          // Apply transformation to the whole doc, where speaker matches old speaker name, and set it to new one
+          Transforms.setNodes(
+            editor,
+            { type: 'timedText', speaker: newSpeakerName },
+            {
+              at: rangeForTheWholeEditor,
+              match: (node: Node) => {
+                assert('type' in node && node.type === 'timedText');
+                return node.type === 'timedText' && node.speaker.toLowerCase() === oldSpeakerName.toLowerCase();
+              },
+            }
+          );
         } else {
-          // handles if click cancel and doesn't set speaker name
-          handleAnalyticsEvents?.('ste_set_speaker_name', {
-            fn: 'handleSetSpeakerName',
-            changeSpeaker: false,
-            updateMultiple: false,
-          });
+          // only apply speaker name transformation to current element
+          Transforms.setNodes(editor, { type: 'timedText', speaker: newSpeakerName }, { at: pathToCurrentNode });
         }
+      } else {
+        // handles if click cancel and doesn't set speaker name
+        handleAnalyticsEvents?.('ste_set_speaker_name', {
+          fn: 'handleSetSpeakerName',
+          changeSpeaker: false,
+          updateMultiple: false,
+        });
       }
-    },
-    [editor, handleAnalyticsEvents, isEditable]
-  );
+    }
+  }, [editor, handleAnalyticsEvents, isEditable, props.element]);
 
   let textColspan = 12;
   if (!showSpeakers && !showTimecodes) {
@@ -82,6 +79,8 @@ export function TimedTextElement({ showSpeakers, showTimecodes, ...props }: Time
     textColspan = 9;
   }
 
+  // const future = useMemo(() => (props.element.index > currentIndex ? 'true' : 'false'), [currentIndex, props.element.index]);
+
   return (
     <Grid direction="row" justifyContent="flex-start" alignItems="flex-start" templateColumns="repeat(12, 1fr)" {...props.attributes}>
       {showTimecodes && (
@@ -92,13 +91,20 @@ export function TimedTextElement({ showSpeakers, showTimecodes, ...props }: Time
             _hover={{
               textDecoration: 'underline',
             }}
-            color={props.element.start > currentTime ? '#9e9e9e' : 'black'}
+            sx={{
+              '&[data-future=true]': {
+                color: '#9e9e9e',
+              },
+            }}
+            color="black"
             cursor="pointer"
             className={'timecode'}
             onClick={handleTimedTextClick}
             onDoubleClick={handleTimedTextClick}
             title={props.element.startTimecode}
             data-start={props.element.start}
+            //data-index={props.element.index}
+            // data-future={future}
           >
             {props.element.startTimecode}
           </chakra.code>
@@ -107,7 +113,6 @@ export function TimedTextElement({ showSpeakers, showTimecodes, ...props }: Time
       {showSpeakers && (
         <GridItem contentEditable={false} colSpan={2}>
           <Text
-            noWrap
             contentEditable={false}
             userSelect="none"
             cursor="pointer"
@@ -115,7 +120,7 @@ export function TimedTextElement({ showSpeakers, showTimecodes, ...props }: Time
             textTransform="uppercase"
             className={'text-truncate text-muted'}
             title={props.element.speaker}
-            onClick={() => handleSetSpeakerName(props.element)}
+            onClick={handleSetSpeakerName}
           >
             {props.element.speaker}
           </Text>

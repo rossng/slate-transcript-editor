@@ -1,22 +1,36 @@
 import assert from 'assert';
-import React, { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import * as R from 'ramda';
+import React, { PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Descendant } from 'slate';
+import { createContext, useContextSelector } from 'use-context-selector';
 import SlateHelpers from '../../slate-helpers';
 import { useTranscriptEditorContext } from './transcript-editor-context';
 
 interface MediaPlayerCtx {
   currentTime: number;
-  duration: number;
-  handleTimedTextClick: (event: React.MouseEvent<HTMLElement>) => void;
-  mediaRef: React.RefObject<HTMLVideoElement>;
-  playbackRate: number;
-  setPlaybackRate: (rate: number) => void;
+  other: {
+    duration: number;
+    handleTimedTextClick: (event: React.MouseEvent<HTMLElement>) => void;
+    mediaRef: React.RefObject<HTMLVideoElement>;
+    playbackRate: number;
+    setPlaybackRate: (rate: number) => void;
+    currentIndex: number;
+  };
 }
 
-const MediaPlayerContext = createContext<MediaPlayerCtx | undefined>(undefined);
+export const MediaPlayerContext = createContext<MediaPlayerCtx | undefined>(undefined);
 
-export function useMediaPlayerContext(): MediaPlayerCtx {
-  const ctx = useContext(MediaPlayerContext);
+export function useMediaPlayerContext(): MediaPlayerCtx['other'] {
+  const ctx = useContextSelector(MediaPlayerContext, (v) => v?.other);
   if (!ctx) {
+    throw new Error('MediaPlayerContext not available - are you outside the provider?');
+  }
+  return ctx;
+}
+
+export function useMediaPlayerTime(): number {
+  const ctx = useContextSelector(MediaPlayerContext, (v) => v?.currentTime);
+  if (ctx !== 0 && !ctx) {
     throw new Error('MediaPlayerContext not available - are you outside the provider?');
   }
   return ctx;
@@ -27,27 +41,24 @@ export function MediaPlayerContextProvider({ children }: PropsWithChildren<Recor
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const mediaRef = useRef<HTMLVideoElement>(null);
-  const { editor, handleAnalyticsEvents } = useTranscriptEditorContext();
+  const { editor, handleAnalyticsEvents, value } = useTranscriptEditorContext();
 
-  const handleTimeUpdated = useCallback(
-    (e) => {
-      setCurrentTime(e.target.currentTime);
-      // TODO: setting duration here as a workaround
-      if (mediaRef.current) {
-        setDuration(mediaRef.current.duration);
-      }
-      //  TODO: commenting this out for now, not sure if it will fire to often?
-      // if (props.handleAnalyticsEvents) {
-      //   // handles if click cancel and doesn't set speaker name
-      //   props.handleTimeUpdated('ste_handle_time_update', {
-      //     fn: 'handleTimeUpdated',
-      //     duration: mediaRef.current.duration,
-      //     currentTime: e.target.currentTime,
-      //   });
-      // }
-    },
-    [mediaRef]
-  );
+  const handleTimeUpdated = useCallback((e) => {
+    setCurrentTime(e.target.currentTime);
+    // TODO: setting duration here as a workaround
+    if (mediaRef.current) {
+      setDuration(mediaRef.current.duration);
+    }
+    //  TODO: commenting this out for now, not sure if it will fire to often?
+    // if (props.handleAnalyticsEvents) {
+    //   // handles if click cancel and doesn't set speaker name
+    //   props.handleTimeUpdated('ste_handle_time_update', {
+    //     fn: 'handleTimeUpdated',
+    //     duration: mediaRef.current.duration,
+    //     currentTime: e.target.currentTime,
+    //   });
+    // }
+  }, []);
 
   useEffect(() => {
     // Update the document title using the browser API
@@ -119,16 +130,28 @@ export function MediaPlayerContextProvider({ children }: PropsWithChildren<Recor
     [editor, handleAnalyticsEvents, mediaRef]
   );
 
-  const ctx = useMemo(
-    (): MediaPlayerCtx => ({
-      currentTime,
+  const currentIndex = useMemo(() => {
+    return R.findLastIndex(R.propSatisfies<number, Descendant>((start: number) => start < currentTime, 'start'))(value);
+  }, [currentTime, value]);
+
+  const other = useMemo(
+    (): MediaPlayerCtx['other'] => ({
       duration,
       handleTimedTextClick,
       mediaRef,
       playbackRate,
       setPlaybackRate,
+      currentIndex,
     }),
-    [currentTime, duration, handleTimedTextClick, playbackRate]
+    [currentIndex, duration, handleTimedTextClick, playbackRate]
+  );
+
+  const ctx = useMemo(
+    (): MediaPlayerCtx => ({
+      currentTime,
+      other,
+    }),
+    [currentTime, other]
   );
 
   return <MediaPlayerContext.Provider value={ctx}>{children}</MediaPlayerContext.Provider>;
