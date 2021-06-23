@@ -1,10 +1,8 @@
 import assert from 'assert';
-import * as R from 'ramda';
 import React, { PropsWithChildren, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Descendant } from 'slate';
 import { createContext, useContextSelector } from 'use-context-selector';
 import SlateHelpers from '../../slate-helpers';
-import { useTranscriptEditorContext } from './transcript-editor-context';
+import { useTranscriptEditorContext, useTranscriptValue } from './transcript-editor-context';
 
 interface MediaPlayerCtx {
   currentTime: number;
@@ -14,7 +12,7 @@ interface MediaPlayerCtx {
     mediaRef: React.RefObject<HTMLVideoElement>;
     playbackRate: number;
     setPlaybackRate: (rate: number) => void;
-    currentIndex: number;
+    // currentIndex: number;
   };
 }
 
@@ -41,7 +39,8 @@ export function MediaPlayerContextProvider({ children }: PropsWithChildren<Recor
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const mediaRef = useRef<HTMLVideoElement>(null);
-  const { editor, handleAnalyticsEvents, value } = useTranscriptEditorContext();
+  const { editor, handleAnalyticsEvents } = useTranscriptEditorContext();
+  const { value } = useTranscriptValue();
 
   const handleTimeUpdated = useCallback((e) => {
     setCurrentTime(e.target.currentTime);
@@ -130,9 +129,9 @@ export function MediaPlayerContextProvider({ children }: PropsWithChildren<Recor
     [editor, handleAnalyticsEvents, mediaRef]
   );
 
-  const currentIndex = useMemo(() => {
-    return R.findLastIndex(R.propSatisfies<number, Descendant>((start: number) => start < currentTime, 'start'))(value);
-  }, [currentTime, value]);
+  // const currentIndex = useMemo(() => {
+  //   return R.findLastIndex(R.propSatisfies<number, Descendant>((start: number) => start < currentTime, 'start'))(value);
+  // }, [currentTime, value]);
 
   const other = useMemo(
     (): MediaPlayerCtx['other'] => ({
@@ -141,9 +140,8 @@ export function MediaPlayerContextProvider({ children }: PropsWithChildren<Recor
       mediaRef,
       playbackRate,
       setPlaybackRate,
-      currentIndex,
     }),
-    [currentIndex, duration, handleTimedTextClick, playbackRate]
+    [duration, handleTimedTextClick, playbackRate]
   );
 
   const ctx = useMemo(

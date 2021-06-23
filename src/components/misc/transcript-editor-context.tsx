@@ -1,9 +1,10 @@
 import path from 'path';
 import * as R from 'ramda';
-import React, { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { PropsWithChildren, useCallback, useEffect, useMemo, useState } from 'react';
 import { BaseEditor, createEditor, Descendant, Transforms } from 'slate';
 import { HistoryEditor, withHistory } from 'slate-history';
 import { ReactEditor, withReact } from 'slate-react';
+import { createContext, useContextSelector } from 'use-context-selector';
 import { download } from '../../util/download';
 import { convertDpeToSlate, TranscriptData } from '../../util/dpe-to-slate';
 import { exportAdapter, ExportData, isCaptionType } from '../../util/export-adapters';
@@ -12,32 +13,54 @@ import updateBlocksTimestamps from '../../util/export-adapters/slate-to-dpe/upda
 import insertTimecodesInLineInSlateJs from '../../util/insert-timecodes-in-line-in-words-list';
 
 interface TranscriptEditorCtx {
-  isEditable?: boolean;
-  setValue: React.Dispatch<React.SetStateAction<Descendant[]>>;
-  value: Descendant[];
-  editor: BaseEditor & ReactEditor & HistoryEditor;
-  setIsContentModified: React.Dispatch<React.SetStateAction<boolean>>;
-  isContentModified: boolean;
-  setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>;
-  isProcessing: boolean;
-  setIsContentSaved: React.Dispatch<React.SetStateAction<boolean>>;
-  isContentSaved: boolean;
-  setIsPauseWhileTyping: React.Dispatch<React.SetStateAction<boolean>>;
-  isPauseWhileTyping: boolean;
-  speakerOptions: string[];
-  insertTextInaudible: () => void;
-  insertMusicNote: () => void;
-  handleAnalyticsEvents?: (eventName: string, properties: { fn: string; [key: string]: any }) => void;
-  mediaUrl: string;
-  handleSave: () => Promise<void>;
-  handleExport: (data: ExportData) => Promise<string>;
-  handleReplaceText: () => void;
+  main: {
+    isEditable?: boolean;
+    editor: BaseEditor & ReactEditor & HistoryEditor;
+    setIsPauseWhileTyping: React.Dispatch<React.SetStateAction<boolean>>;
+    isPauseWhileTyping: boolean;
+    insertTextInaudible: () => void;
+    insertMusicNote: () => void;
+    handleAnalyticsEvents?: (eventName: string, properties: { fn: string; [key: string]: any }) => void;
+    mediaUrl: string;
+    handleReplaceText: () => void;
+  };
+  status: {
+    setIsContentModified: React.Dispatch<React.SetStateAction<boolean>>;
+    isContentModified: boolean;
+    setIsProcessing: React.Dispatch<React.SetStateAction<boolean>>;
+    isProcessing: boolean;
+    setIsContentSaved: React.Dispatch<React.SetStateAction<boolean>>;
+    isContentSaved: boolean;
+  };
+  value: {
+    setValue: React.Dispatch<React.SetStateAction<Descendant[]>>;
+    value: Descendant[];
+    handleExport: (data: ExportData) => Promise<string>;
+    handleSave: () => Promise<void>;
+    speakerOptions: string[];
+  };
 }
 
 const TranscriptEditorContext = createContext<TranscriptEditorCtx | undefined>(undefined);
 
-export function useTranscriptEditorContext(): TranscriptEditorCtx {
-  const ctx = useContext(TranscriptEditorContext);
+export function useTranscriptEditorContext(): TranscriptEditorCtx['main'] {
+  const ctx = useContextSelector(TranscriptEditorContext, (v) => v?.main);
+  if (!ctx) {
+    throw new Error('TranscriptEditorContext not available - are you outside the provider?');
+  }
+  return ctx;
+}
+
+export function useTranscriptEditorStatus(): TranscriptEditorCtx['status'] {
+  const ctx = useContextSelector(TranscriptEditorContext, (v) => v?.status);
+  if (!ctx) {
+    throw new Error('TranscriptEditorContext not available - are you outside the provider?');
+  }
+  return ctx;
+}
+
+export function useTranscriptValue(): TranscriptEditorCtx['value'] {
+  const ctx = useContextSelector(TranscriptEditorContext, (v) => v?.value);
   if (!ctx) {
     throw new Error('TranscriptEditorContext not available - are you outside the provider?');
   }
@@ -66,7 +89,6 @@ export function TranscriptEditorContextProvider({
 }>): JSX.Element {
   const editor = useMemo(() => withReact(withHistory(createEditor())), []);
   const [value, setValue] = useState<Descendant[]>([]);
-  const [speakerOptions, setSpeakerOptions] = useState<string[]>([]);
   const [isPauseWhileTyping, setIsPauseWhileTyping] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   // used isContentModified to avoid unnecessarily running alignment if the slate value content has not been modified by the user since
@@ -107,12 +129,11 @@ export function TranscriptEditorContextProvider({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [transcriptDataLive]);
 
-  useEffect(() => {
+  const speakerOptions = useMemo(() => {
     const getUniqueSpeakers = R.pipe(R.pluck('speaker'), R.uniq);
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const uniqueSpeakers = getUniqueSpeakers(value);
-    setSpeakerOptions(uniqueSpeakers);
+    return getUniqueSpeakers(value);
   }, [value]);
 
   const insertTextInaudible = useCallback(() => {
@@ -137,9 +158,7 @@ export function TranscriptEditorContextProvider({
     // TODO: convert to a proper modal
     const newText = prompt('Paste the text to replace here.');
     if (newText) {
-      const newValue = plainTextAlignToSlateJs(transcriptData, newText, value);
-      setValue(newValue);
-
+      setValue((value) => plainTextAlignToSlateJs(transcriptData, newText, value));
       // TODO: consider adding some kind of word count here?
 
       // handles if click cancel and doesn't set speaker name
@@ -147,7 +166,7 @@ export function TranscriptEditorContextProvider({
         fn: 'handleReplaceText',
       });
     }
-  }, [handleAnalyticsEvents, transcriptData, value]);
+  }, [handleAnalyticsEvents, transcriptData]);
 
   // TODO: refactor this function, to be cleaner and easier to follow.
   const handleRestoreTimecodes = useCallback(
@@ -215,7 +234,7 @@ export function TranscriptEditorContextProvider({
         if (isContentModified && isCaptionType(type)) {
           tmpValue = await handleRestoreTimecodes();
         }
-        // export adapter does not doo any alignment
+        // export adapter does not do any alignment
         // just converts between formats
         let editorContent = exportAdapter({
           slateValue: tmpValue,
@@ -264,46 +283,51 @@ export function TranscriptEditorContextProvider({
     }
   }, [autoSaveContentType, handleAnalyticsEvents, handleExport, handleSaveEditor, isEditable]);
 
-  const ctx = useMemo(
-    (): TranscriptEditorCtx => ({
-      isEditable,
+  const valueCtx = useMemo(
+    (): TranscriptEditorCtx['value'] => ({
       setValue,
       value,
+      speakerOptions,
+      handleExport,
+      handleSave,
+    }),
+    [handleExport, handleSave, speakerOptions, value]
+  );
+
+  const mainCtx = useMemo(
+    (): TranscriptEditorCtx['main'] => ({
       editor,
+      isEditable,
+      setIsPauseWhileTyping,
+      isPauseWhileTyping,
+      insertTextInaudible,
+      insertMusicNote,
+      handleAnalyticsEvents,
+      mediaUrl,
+      handleReplaceText,
+    }),
+    [editor, handleAnalyticsEvents, handleReplaceText, insertMusicNote, insertTextInaudible, isEditable, isPauseWhileTyping, mediaUrl]
+  );
+
+  const statusCtx = useMemo(
+    (): TranscriptEditorCtx['status'] => ({
       setIsContentModified,
       isContentModified,
       setIsProcessing,
       isProcessing,
       setIsContentSaved,
       isContentSaved,
-      setIsPauseWhileTyping,
-      isPauseWhileTyping,
-      speakerOptions,
-      insertTextInaudible,
-      insertMusicNote,
-      handleAnalyticsEvents,
-      mediaUrl,
-      handleExport,
-      handleReplaceText,
-      handleSave,
     }),
-    [
-      editor,
-      insertMusicNote,
-      insertTextInaudible,
-      isContentModified,
-      isContentSaved,
-      isEditable,
-      isPauseWhileTyping,
-      isProcessing,
-      speakerOptions,
-      value,
-      handleAnalyticsEvents,
-      mediaUrl,
-      handleExport,
-      handleReplaceText,
-      handleSave,
-    ]
+    [isContentModified, isContentSaved, isProcessing]
+  );
+
+  const ctx = useMemo(
+    (): TranscriptEditorCtx => ({
+      value: valueCtx,
+      main: mainCtx,
+      status: statusCtx,
+    }),
+    [valueCtx, mainCtx, statusCtx]
   );
 
   return <TranscriptEditorContext.Provider value={ctx}>{children}</TranscriptEditorContext.Provider>;

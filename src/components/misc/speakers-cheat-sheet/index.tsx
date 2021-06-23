@@ -1,9 +1,9 @@
 import { Accordion, AccordionButton, AccordionIcon, AccordionItem, AccordionPanel, Box, Text } from '@chakra-ui/react';
 import React from 'react';
-import { useTranscriptEditorContext } from '../transcript-editor-context';
+import { useTranscriptValue } from '../transcript-editor-context';
 
 export function SpeakersCheatSheet(): JSX.Element {
-  const context = useTranscriptEditorContext();
+  const { speakerOptions } = useTranscriptValue();
 
   return (
     <Accordion allowToggle>
@@ -15,7 +15,7 @@ export function SpeakersCheatSheet(): JSX.Element {
           <AccordionIcon />
         </AccordionButton>
         <AccordionPanel pb={4}>
-          {context.speakerOptions.map((speakerName, index) => {
+          {speakerOptions.map((speakerName, index) => {
             return (
               <Text key={index + speakerName} className={'text-truncate'}>
                 {speakerName}

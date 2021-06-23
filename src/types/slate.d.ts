@@ -20,6 +20,7 @@ declare module 'slate' {
       start: number; // seconds
       startTimecode: string; // e.g. "00:00:25"
       children: CustomText[];
+      highlight?: boolean;
     };
     Text: CustomText;
   }

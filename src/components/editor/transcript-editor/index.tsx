@@ -1,11 +1,11 @@
 import { Box, chakra } from '@chakra-ui/react';
 import debounce from 'lodash/debounce';
-import React, { useCallback } from 'react';
-import { Descendant } from 'slate';
+import React, { useCallback, useEffect } from 'react';
+import { Descendant, Element, Transforms } from 'slate';
 import { DefaultElement, Editable, RenderElementProps, RenderLeafProps, Slate } from 'slate-react';
 import SlateHelpers from '../../../slate-helpers';
-import { useMediaPlayerContext } from '../../misc/media-player-context';
-import { useTranscriptEditorContext } from '../../misc/transcript-editor-context';
+import { useMediaPlayerContext, useMediaPlayerTime } from '../../misc/media-player-context';
+import { useTranscriptEditorContext, useTranscriptEditorStatus, useTranscriptValue } from '../../misc/transcript-editor-context';
 import { TimedTextElement } from '../timed-text-element';
 
 const PAUSE_WHILE_TYPING_TIMEOUT_MILLISECONDS = 1500;
@@ -24,14 +24,40 @@ export function TranscriptEditor({
   showTimecodes: boolean;
   handleAutoSaveChanges?: (value: Descendant[]) => void;
 }): JSX.Element {
-  const { setValue, value, setIsContentModified, setIsContentSaved, isPauseWhileTyping, editor, handleAnalyticsEvents, isEditable } =
-    useTranscriptEditorContext();
-  const { handleTimedTextClick, mediaRef, currentIndex } = useMediaPlayerContext();
+  const { isPauseWhileTyping, editor, handleAnalyticsEvents, isEditable } = useTranscriptEditorContext();
+  const { setIsContentModified, setIsContentSaved } = useTranscriptEditorStatus();
+  const { setValue, value } = useTranscriptValue();
+  const { handleTimedTextClick, mediaRef } = useMediaPlayerContext();
+  const currentTime = useMediaPlayerTime();
+
+  useEffect(() => {
+    Transforms.setNodes(
+      editor,
+      { highlight: true },
+      {
+        at: [],
+        match: (node, _path) => {
+          return Element.isElement(node) && !node.highlight && node.start <= currentTime;
+        },
+      }
+    );
+    Transforms.setNodes(
+      editor,
+      { highlight: false },
+      {
+        at: [],
+        match: (node, _path) => {
+          return Element.isElement(node) && !!node.highlight && node.start > currentTime;
+        },
+      }
+    );
+  }, [currentTime, editor]);
 
   const renderElement = useCallback(
     (elementProps: RenderElementProps) => {
       switch (elementProps.element.type) {
         case 'timedText':
+          elementProps.attributes;
           return <TimedTextElement showSpeakers={showSpeakers} showTimecodes={showTimecodes} {...elementProps} />;
         default:
           return <DefaultElement {...elementProps} />;
@@ -43,23 +69,12 @@ export function TranscriptEditor({
   const renderLeaf = useCallback(
     ({ attributes, children }: RenderLeafProps): JSX.Element => {
       return (
-        <chakra.span
-          onDoubleClick={handleTimedTextClick}
-          sx={{
-            '&[data-future=true]': {
-              color: '#9e9e9e',
-            },
-          }}
-          className="timecode"
-          data-start={children.props.parent.start}
-          data-future={children.props.parent.index > currentIndex ? 'true' : 'false'}
-          {...attributes}
-        >
+        <chakra.span onDoubleClick={handleTimedTextClick} className="timecode" data-start={children.props.parent.start} {...attributes}>
           {children}
         </chakra.span>
       );
     },
-    [currentIndex, handleTimedTextClick]
+    [handleTimedTextClick]
   );
 
   /**
@@ -153,18 +168,16 @@ export function TranscriptEditor({
   return (
     <Box>
       {value.length !== 0 ? (
-        <>
-          <chakra.section fontFamily="Roboto, sans-serif" padding="8px 16px" h="85vh" overflow="auto">
-            <Slate editor={editor} value={value} onChange={onChange}>
-              <Editable
-                readOnly={typeof isEditable === 'boolean' ? !isEditable : false}
-                renderElement={renderElement}
-                renderLeaf={renderLeaf}
-                onKeyDown={handleOnKeyDown}
-              />
-            </Slate>
-          </chakra.section>
-        </>
+        <chakra.section fontFamily="Roboto, sans-serif" padding="8px 16px" h="85vh" overflow="auto">
+          <Slate editor={editor} value={value} onChange={onChange}>
+            <Editable
+              readOnly={typeof isEditable === 'boolean' ? !isEditable : false}
+              renderElement={renderElement}
+              renderLeaf={renderLeaf}
+              onKeyDown={handleOnKeyDown}
+            />
+          </Slate>
+        </chakra.section>
       ) : (
         <section className="text-center">
           <i className="text-center">Loading...</i>

@@ -12,7 +12,7 @@ import { MenuButtons } from '../menus/menu-buttons';
 import { Instructions } from '../misc/instructions';
 import { MediaPlayerContextProvider } from '../misc/media-player-context';
 import { SpeakersCheatSheet } from '../misc/speakers-cheat-sheet';
-import { TranscriptEditorContextProvider, useTranscriptEditorContext } from '../misc/transcript-editor-context';
+import { TranscriptEditorContextProvider, useTranscriptEditorStatus } from '../misc/transcript-editor-context';
 
 export interface Props {
   transcriptData: TranscriptData;
@@ -70,7 +70,7 @@ function DefaultLayoutInner({
   children,
   title,
 }: PropsWithChildren<{ showSpeakers: boolean; showTimecodes: boolean; title?: string; showTitle: boolean }>) {
-  const { isProcessing } = useTranscriptEditorContext();
+  const { isProcessing } = useTranscriptEditorStatus();
 
   useEffect(() => {
     if (isProcessing) {

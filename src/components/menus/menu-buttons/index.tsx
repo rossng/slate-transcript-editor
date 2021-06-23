@@ -2,7 +2,7 @@ import { Button, Divider, Flex, Link, Menu, MenuButton, MenuGroup, MenuItem, Men
 import React, { PropsWithChildren } from 'react';
 import { MdImportExport, MdInsertEmoticon, MdKeyboardArrowDown, MdMusicNote, MdRedo, MdSave, MdUndo } from 'react-icons/md';
 import { subtitlesExportOptionsList } from '../../../util/export-adapters/subtitles-generator/list';
-import { useTranscriptEditorContext } from '../../misc/transcript-editor-context';
+import { useTranscriptEditorContext, useTranscriptEditorStatus, useTranscriptValue } from '../../misc/transcript-editor-context';
 
 const REPLACE_WHOLE_TEXT_INSTRUCTION = `Replace whole text.
 
@@ -13,8 +13,9 @@ For now this is an experimental feature.
 It expects plain text, with paragraph breaks as new line breaks but no speakers.`;
 
 export function MenuButtons({ children }: PropsWithChildren<Record<never, never>>): JSX.Element {
-  const { editor, isProcessing, isEditable, insertMusicNote, insertTextInaudible, handleExport, handleSave, handleReplaceText } =
-    useTranscriptEditorContext();
+  const { editor, isEditable, insertMusicNote, insertTextInaudible, handleReplaceText } = useTranscriptEditorContext();
+  const { isProcessing } = useTranscriptEditorStatus();
+  const { handleExport, handleSave } = useTranscriptValue();
 
   const handleUndo = () => {
     editor.undo();
@@ -26,7 +27,7 @@ export function MenuButtons({ children }: PropsWithChildren<Record<never, never>
 
   return (
     <Flex direction="column" justifyContent="flex-start" alignItems="stretch" mx={2} gridRowGap={2}>
-      <Menu>
+      <Menu isLazy>
         <Tooltip label="Export">
           <MenuButton
             as={Button}

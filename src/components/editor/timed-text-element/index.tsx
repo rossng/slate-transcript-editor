@@ -1,6 +1,5 @@
 import { chakra, Grid, GridItem, GridProps, Text } from '@chakra-ui/react';
-import assert from 'assert';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Editor, Element, Node, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { useMediaPlayerContext } from '../../misc/media-player-context';
@@ -15,8 +14,10 @@ export interface TimedTextElementProps {
 }
 
 export function TimedTextElement({ showSpeakers, showTimecodes, ...props }: TimedTextElementProps): JSX.Element {
-  const { editor, isEditable, handleAnalyticsEvents } = useTranscriptEditorContext();
-  const { handleTimedTextClick, currentIndex } = useMediaPlayerContext();
+  const { isEditable, handleAnalyticsEvents, editor } = useTranscriptEditorContext();
+  const { handleTimedTextClick } = useMediaPlayerContext();
+
+  const pathToCurrentNodeString = useMemo(() => JSON.stringify(ReactEditor.findPath(editor, props.element)), [editor, props.element]);
 
   /**
    * `handleSetSpeakerName` is outside of TimedTextElement
@@ -26,8 +27,9 @@ export function TimedTextElement({ showSpeakers, showTimecodes, ...props }: Time
    */
   const handleSetSpeakerName = useCallback(() => {
     if (isEditable) {
-      const pathToCurrentNode = ReactEditor.findPath(editor, props.element);
+      const pathToCurrentNode = JSON.parse(pathToCurrentNodeString);
       const oldSpeakerName = props.element.speaker;
+
       const newSpeakerName = prompt('Change speaker name', oldSpeakerName);
       if (newSpeakerName) {
         const isUpdateAllSpeakerInstances = confirm(`Would you like to replace all occurrences of ${oldSpeakerName} with ${newSpeakerName}?`);
@@ -48,8 +50,7 @@ export function TimedTextElement({ showSpeakers, showTimecodes, ...props }: Time
             {
               at: rangeForTheWholeEditor,
               match: (node: Node) => {
-                assert('type' in node && node.type === 'timedText');
-                return node.type === 'timedText' && node.speaker.toLowerCase() === oldSpeakerName.toLowerCase();
+                return Element.isElement(node) && node.speaker.toLowerCase() === oldSpeakerName.toLowerCase();
               },
             }
           );
@@ -66,7 +67,7 @@ export function TimedTextElement({ showSpeakers, showTimecodes, ...props }: Time
         });
       }
     }
-  }, [editor, handleAnalyticsEvents, isEditable, props.element]);
+  }, [editor, handleAnalyticsEvents, isEditable, pathToCurrentNodeString, props.element.speaker]);
 
   let textColspan = 12;
   if (!showSpeakers && !showTimecodes) {
@@ -79,10 +80,15 @@ export function TimedTextElement({ showSpeakers, showTimecodes, ...props }: Time
     textColspan = 9;
   }
 
-  // const future = useMemo(() => (props.element.index > currentIndex ? 'true' : 'false'), [currentIndex, props.element.index]);
-
   return (
-    <Grid direction="row" justifyContent="flex-start" alignItems="flex-start" templateColumns="repeat(12, 1fr)" {...props.attributes}>
+    <Grid
+      direction="row"
+      justifyContent="flex-start"
+      alignItems="flex-start"
+      templateColumns="repeat(12, 1fr)"
+      color={props.element.highlight ? 'black' : '#9e9e9e'}
+      {...props.attributes}
+    >
       {showTimecodes && (
         <GridItem contentEditable={false} colSpan={1}>
           <chakra.code
@@ -91,11 +97,6 @@ export function TimedTextElement({ showSpeakers, showTimecodes, ...props }: Time
             _hover={{
               textDecoration: 'underline',
             }}
-            sx={{
-              '&[data-future=true]': {
-                color: '#9e9e9e',
-              },
-            }}
             color="black"
             cursor="pointer"
             className={'timecode'}
@@ -103,8 +104,6 @@ export function TimedTextElement({ showSpeakers, showTimecodes, ...props }: Time
             onDoubleClick={handleTimedTextClick}
             title={props.element.startTimecode}
             data-start={props.element.start}
-            //data-index={props.element.index}
-            // data-future={future}
           >
             {props.element.startTimecode}
           </chakra.code>
