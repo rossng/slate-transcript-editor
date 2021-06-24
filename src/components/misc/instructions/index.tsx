@@ -13,7 +13,7 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import React from 'react';
-import { MdInfoOutline, MdKeyboard, MdKeyboardReturn, MdMouse, MdPeople, MdSave } from 'react-icons/md';
+import { MdFileDownload, MdInfoOutline, MdKeyboard, MdKeyboardReturn, MdMouse, MdPeople, MdSave } from 'react-icons/md';
 import { useTranscriptEditorContext } from '../transcript-editor-context';
 
 export function Instructions(): JSX.Element {
@@ -29,7 +29,7 @@ export function Instructions(): JSX.Element {
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader>Modal Title</ModalHeader>
+          <ModalHeader>Help</ModalHeader>
           <ModalCloseButton />
           <ModalBody pb={4}>
             {!context.isEditable && <Text>You are in read only mode.</Text>}
@@ -56,7 +56,7 @@ export function Instructions(): JSX.Element {
                   Remember to save regularly.
                 </ListItem>
                 <ListItem>
-                  <ListIcon as={MdSave} />
+                  <ListIcon as={MdFileDownload} />
                   Export to get a copy.
                 </ListItem>
               </List>

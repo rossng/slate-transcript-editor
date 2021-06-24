@@ -1,6 +1,6 @@
-import { Button, Divider, Flex, Link, Menu, MenuButton, MenuGroup, MenuItem, MenuList, Tooltip, VisuallyHidden } from '@chakra-ui/react';
+import { Button, chakra, Divider, Flex, Icon, Link, Menu, MenuButton, MenuGroup, MenuItem, MenuList, Tooltip } from '@chakra-ui/react';
 import React, { PropsWithChildren } from 'react';
-import { MdImportExport, MdInsertEmoticon, MdKeyboardArrowDown, MdMusicNote, MdRedo, MdSave, MdUndo } from 'react-icons/md';
+import { MdFileDownload, MdImportExport, MdKeyboardArrowDown, MdMusicNote, MdRedo, MdSave, MdUndo } from 'react-icons/md';
 import { subtitlesExportOptionsList } from '../../../util/export-adapters/subtitles-generator/list';
 import { useTranscriptEditorContext, useTranscriptEditorStatus, useTranscriptValue } from '../../misc/transcript-editor-context';
 
@@ -29,15 +29,8 @@ export function MenuButtons({ children }: PropsWithChildren<Record<never, never>
     <Flex direction="column" justifyContent="flex-start" alignItems="stretch" mx={2} gridRowGap={2}>
       <Menu isLazy>
         <Tooltip label="Export">
-          <MenuButton
-            as={Button}
-            rightIcon={
-              <>
-                <MdSave color="primary" /> <MdKeyboardArrowDown color="primary" />
-              </>
-            }
-          >
-            <VisuallyHidden>Export</VisuallyHidden>
+          <MenuButton as={Button} aria-label="Export transcript" rightIcon={<MdKeyboardArrowDown color="primary" />}>
+            <Icon as={MdFileDownload} mx="auto" color="primary" />
           </MenuButton>
         </Tooltip>
         <MenuList maxH="70vh" overflowY="auto">
@@ -244,8 +237,8 @@ export function MenuButtons({ children }: PropsWithChildren<Record<never, never>
       {isEditable && (
         <>
           <Tooltip label="Put the cursor at a point where you'd want to add [INAUDIBLE] text, and click this button">
-            <Button isDisabled={isProcessing} onClick={insertTextInaudible}>
-              <MdInsertEmoticon aria-label="insert [inaudible]" />
+            <Button isDisabled={isProcessing} onClick={insertTextInaudible} aria-label="insert [INAUDIBLE]">
+              <chakra.span fontSize="10">[inaudible]</chakra.span>
             </Button>
           </Tooltip>
 
